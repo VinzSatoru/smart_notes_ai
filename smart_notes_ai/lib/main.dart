@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/auth_provider.dart';
+import 'providers/note_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -18,6 +19,7 @@ class SmartNotesApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => NoteProvider()),
       ],
       child: MaterialApp(
         title: 'Smart Notes AI',
