@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Notes Content
           Expanded(
             child: noteProvider.isLoading
-                ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+                ? const Center(child: CircularProgressIndicator(color: Color(0xFF4F64F2)))
                 : noteProvider.notes.isEmpty
                     ? _buildEmptyState()
                     : _buildNotesList(noteProvider),
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color(0xFF4F64F2),
         foregroundColor: Colors.white,
         elevation: 4,
         icon: const Icon(Icons.mic),
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.teal : Colors.grey.shade100,
+          color: isSelected ? const Color(0xFF4F64F2) : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,

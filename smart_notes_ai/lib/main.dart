@@ -8,6 +8,7 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const SmartNotesApp());
 }
 
@@ -25,8 +26,8 @@ class SmartNotesApp extends StatelessWidget {
         title: 'Smart Notes AI',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-          textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F64F2)),
+          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
           useMaterial3: true,
         ),
         // Cek apakah user sudah login atau belum untuk menentukan halaman awal

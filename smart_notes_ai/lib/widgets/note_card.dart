@@ -35,10 +35,10 @@ class NoteCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: Colors.teal.shade50,
+      color: const Color(0xFFEEF0FC), // Warna latar belakang kartu
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.teal.shade100, width: 1),
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFFD4DAF9), width: 1),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -72,7 +72,7 @@ class NoteCard extends StatelessWidget {
                       child: Icon(
                         Icons.push_pin,
                         size: 18,
-                        color: Colors.teal,
+                        color: Color(0xFF4F64F2),
                       ),
                     ),
                 ],

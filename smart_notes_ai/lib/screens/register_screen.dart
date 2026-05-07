@@ -15,6 +15,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -27,15 +29,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _handleRegister() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
-    // Validasi kosong
-    if (_nameController.text.isEmpty || 
-        _emailController.text.isEmpty || 
+
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _confirmController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua kolom harus diisi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Semua kolom harus diisi')));
       return;
     }
 
@@ -61,7 +62,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success && mounted) {
-      // Pergi ke Home
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
@@ -72,38 +72,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    const primaryColor = Color(0xFF4F64F2);
+    const inputBgColor = Color(0xFFEEF0FC);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Judul Utama (Figma Style)
                 const Text(
-                  'Buat Akun Baru',
+                  'Daftarkan Akun\nAnda',
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 36,
+                    height: 1.2,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Daftar untuk mulai menyimpan catatan Anda',
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
+                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -114,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       authProvider.errorMessage,
@@ -124,56 +119,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
 
                 // TextField Nama
-                TextField(
+                _buildTextField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Nama Lengkap',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  hintText: 'Nama Lengkap',
+                  bgColor: inputBgColor,
                 ),
                 const SizedBox(height: 16),
 
                 // TextField Email
-                TextField(
+                _buildTextField(
                   controller: _emailController,
+                  hintText: 'masukkan email anda',
                   keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  bgColor: inputBgColor,
                 ),
                 const SizedBox(height: 16),
 
                 // TextField Password
-                TextField(
+                _buildTextField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  hintText: 'masukkan password anda',
+                  obscureText: _obscurePassword,
+                  bgColor: inputBgColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.black54,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // TextField Confirm Password
-                TextField(
+                _buildTextField(
                   controller: _confirmController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Konfirmasi Password',
-                    prefixIcon: const Icon(Icons.lock_reset),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  hintText: 'Ulangi Password',
+                  obscureText: _obscureConfirm,
+                  bgColor: inputBgColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirm
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.black54,
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirm = !_obscureConfirm;
+                      });
+                    },
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -182,11 +183,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   onPressed: authProvider.isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     elevation: 0,
                   ),
@@ -200,19 +201,145 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         )
                       : const Text(
-                          'DAFTAR',
+                          'Daftar',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
                           ),
                         ),
+                ),
+                const SizedBox(height: 32),
+
+                // Atau daftar dengan
+                const Center(
+                  child: Text(
+                    'atau daftar dengan',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Social Login Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSocialButton(Icons.facebook, Colors.blue),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(
+                      Icons.g_mobiledata,
+                      Colors.red,
+                      isGoogle: true,
+                    ),
+                    const SizedBox(width: 20),
+                    _buildSocialButton(Icons.apple, Colors.black),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // Link ke Login
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Sudah memiliki akun? ',
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        'Login disini',
+                        style: TextStyle(
+                          color: primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required Color bgColor,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            color: Colors.black38,
+            fontWeight: FontWeight.normal,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 20,
+          ),
+          suffixIcon: suffixIcon,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton(
+    IconData icon,
+    Color iconColor, {
+    bool isGoogle = false,
+  }) {
+    return Container(
+      width: 70,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: isGoogle
+            ? Text(
+                'G',
+                style: TextStyle(
+                  color: iconColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  fontFamily: 'sans-serif',
+                ),
+              )
+            : Icon(icon, color: iconColor, size: 30),
       ),
     );
   }
