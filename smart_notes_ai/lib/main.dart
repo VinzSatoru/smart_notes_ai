@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'providers/auth_provider.dart';
-import 'providers/note_provider.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'features/notes/presentation/bloc/notes_bloc.dart';
+import 'features/auth/presentation/pages/login_screen.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
+import 'features/notes/presentation/pages/home_screen.dart';
+import 'injection_container.dart' as di;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const SmartNotesApp());
 }
 
@@ -17,28 +20,27 @@ class SmartNotesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => NoteProvider()),
+        BlocProvider(create: (_) => di.sl<AuthBloc>()),
+        BlocProvider(create: (_) => di.sl<NotesBloc>()),
       ],
       child: MaterialApp(
-        title: 'Smart Notes AI',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F64F2)),
-          textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
-          useMaterial3: true,
-        ),
-        // Cek apakah user sudah login atau belum untuk menentukan halaman awal
-        home: Consumer<AuthProvider>(
-          builder: (context, auth, _) {
-            if (auth.isAuthenticated) {
-              return const HomeScreen();
-            }
-            return const LoginScreen();
-          },
-        ),
+          title: 'Smart Notes AI',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F64F2)),
+            textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+            useMaterial3: true,
+          ),
+          home: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is Authenticated) {
+                return const HomeScreen();
+              }
+              return const LoginScreen();
+            },
+          ),
       ),
     );
   }

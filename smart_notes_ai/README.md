@@ -1,65 +1,140 @@
-# Smart Notes AI 🧠
+# Smart Notes AI
 
-Smart Notes AI is a mobile application built with Flutter and powered by PocketBase as the backend. This app allows users to manage notes efficiently with AI capabilities.
+Smart Notes AI adalah aplikasi pencatatan modern berbasis Flutter yang mengimplementasikan **Clean Architecture** dan **BLoC** (Business Logic Component) untuk manajemen *state*. Aplikasi ini menggunakan **PocketBase** sebagai layanan *backend* (BaaS) lokal.
 
-## 🚀 Getting Started
-
-Follow these steps to set up and run the project locally.
-
-### 📋 Prerequisites
-
-- **Flutter SDK**: [Install Flutter](https://docs.flutter.dev/get-started/install)
-- **PocketBase**: The backend executable is included in the `/backend` folder.
+## 🚀 Fitur Utama
+- **Autentikasi Pengguna**: Login dan Registrasi akun (dengan penyimpanan sesi token lokal).
+- **Manajemen Catatan**: Tulis, baca, edit, sematkan (pin), dan hapus catatan.
+- **Kategori Catatan**: Mengelompokkan catatan berdasarkan kategori (Semua, Pekerjaan, Pribadi, dll).
+- **Tampilan Modern**: Antarmuka *Glassmorphism*, *Hero animations*, tipografi `Poppins`, dan desain *card* bergaya premium.
+- **AI Ready**: (Akan datang) Integrasi Speech-to-Text dan format teks otomatis menggunakan AI.
 
 ---
 
-### 🔧 1. Backend Setup (PocketBase)
+## 🏗 Arsitektur
 
-1. Open your terminal and navigate to the backend directory:
-   ```powershell
-   cd backend
-   ```
-2. Run the PocketBase server:
-   ```powershell
-   .\pocketbase serve
-   ```
-3. Access the Admin UI at [http://127.0.0.1:8090/_/](http://127.0.0.1:8090/_/) to manage your database and users.
-   > **Note:** If this is your first time, you will be prompted to create an admin account.
+Aplikasi ini telah direfaktor untuk menggunakan **Clean Architecture** dengan pemisahan struktur berdasarkan fitur (*feature-based folder structure*). Hal ini bertujuan untuk mempermudah pengerjaan tim, *testing*, dan memastikan skalabilitas jangka panjang.
+
+### Struktur Direktori (`lib/`)
+```text
+lib/
+├── core/                   # Utilitas inti (error handling, use cases dasar, themes)
+├── features/               # Fitur utama aplikasi
+│   ├── auth/               # Modul Autentikasi (Login/Register)
+│   │   ├── data/           # Remote Data Sources & Repositories Impl (PocketBase calls)
+│   │   ├── domain/         # Entities, Repositories Interfaces, & Use Cases
+│   │   └── presentation/   # BLoC, Events, States, & UI Screens
+│   │
+│   └── notes/              # Modul Manajemen Catatan
+│       ├── data/           # Remote Data Sources & Repositories Impl
+│       ├── domain/         # Entities (Note, Category), Repositories Interfaces, & Use Cases
+│       └── presentation/   # Notes BLoC & UI Screens (Home, Note Editor)
+│
+├── services/               # Konfigurasi layanan eksternal (PocketBase Client)
+├── injection_container.dart# Setup Dependency Injection (GetIt)
+└── main.dart               # Entry point aplikasi (Inisialisasi BLoC & Routing)
+```
+
+### Stack Teknologi
+- **Frontend**: Flutter & Dart
+- **State Management**: `flutter_bloc`
+- **Dependency Injection**: `get_it`
+- **Error Handling**: `dartz` (Either: Right/Left pattern)
+- **Backend**: PocketBase (berjalan secara lokal)
 
 ---
 
-### 📱 2. Frontend Setup (Flutter)
+## 🛠 Persiapan & Instalasi (Untuk Tim)
 
-1. Navigate to the Flutter project directory:
-   ```powershell
+Berikut adalah langkah-langkah untuk menjalankan *project* ini di mesin lokal Anda.
+
+### 1. Prasyarat Sistem
+Pastikan Anda sudah menginstal:
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.24.x atau terbaru)
+- [Dart SDK](https://dart.dev/get-dart)
+- Emulator Android / iOS atau perangkat fisik yang terhubung (USB Debugging aktif).
+
+### 2. Konfigurasi Backend (PocketBase)
+Karena aplikasi ini mengandalkan *backend* lokal, Anda harus menjalankan PocketBase terlebih dahulu sebelum me-*run* Flutter.
+
+1. Buka folder *backend* di terminal (berada di luar folder `smart_notes_ai`):
+   ```bash
+   cd ../backend
+   ```
+2. Jalankan _server_ PocketBase:
+   ```bash
+   # Di Windows
+   .\pocketbase.exe serve
+   
+   # Di Mac/Linux
+   ./pocketbase serve
+   ```
+3. Pastikan *server* berjalan di `http://127.0.0.1:8090`. (Jika IP berbeda, sesuaikan _base URL_ pada `lib/services/pocketbase_service.dart`).
+4. Buka URL `http://127.0.0.1:8090/_/` di browser untuk mengakses *Admin UI* dari PocketBase jika diperlukan.
+
+### 3. Konfigurasi Frontend (Flutter)
+1. Buka tab terminal baru, lalu navigasi ke direktori *project* Flutter:
+   ```bash
    cd smart_notes_ai
    ```
-2. Install dependencies:
-   ```powershell
+2. Unduh semua *dependencies*:
+   ```bash
    flutter pub get
    ```
-3. **Configuration (Optional):**
-   If you are running on a physical Android device, open `lib/services/pocketbase_service.dart` and update the `baseUrl` with your computer's local IP address.
-   ```dart
-   static const String baseUrl = 'http://YOUR_LOCAL_IP:8090';
-   ```
-   *For Android Emulators, use the default `http://10.0.2.2:8090`.*
-
-4. Run the application:
-   ```powershell
+3. Jalankan aplikasi ke emulator atau *device*:
+   ```bash
    flutter run
    ```
 
 ---
 
-## 🛠 Features
+## 🤝 Alur Kerja Pengembangan (Team Workflow)
 
-- [x] Authentication with PocketBase
-- [x] CRUD Notes
-- [ ] AI Integration (Coming Soon)
-- [ ] Rich Text Editor
+Untuk menjaga *codebase* tetap bersih dan terhindar dari konflik (mengingat ini *project* tim), harap ikuti panduan berikut saat menambah fitur baru:
 
-## 📄 License
+1. **Gunakan Clean Architecture**: Jangan memanggil API (*PocketBase*) langsung dari UI (*Screens*).
+   - Buat/gunakan antarmuka (*Interface*) **Repository** di folder `domain`.
+   - Buat implementasi **Remote Data Source** di folder `data`.
+   - Gunakan **Use Case** di folder `domain` sebagai perantara ke BLoC.
+2. **State Management BLoC**:
+   - Daftarkan *Event* yang merepresentasikan aksi (*User Interaction*).
+   - Kembalikan *State* yang merepresentasikan status (Loading, Success, Failure).
+   - Selalu gunakan `BlocBuilder` untuk me-render UI, dan `BlocConsumer` / `BlocListener` jika Anda butuh aksi sampingan (*side-effects*) seperti `SnackBar` atau Navigasi.
+3. **Dependency Injection**:
+   - Jika Anda membuat *Use Case* atau *BLoC* baru, pastikan Anda mendaftarkannya di dalam file `lib/injection_container.dart` agar dapat digunakan secara global.
 
-This project is licensed under the MIT License.
+---
 
+## 📝 Catatan Penting
+- **Skema PocketBase**: Pada tabel `notes`, *field* teks isi catatan bernama **`content`** (bukan `content_text`). Ini sudah di-*mapping* dengan benar di *model*. Harap jangan mengubah skema PocketBase ini secara sepihak tanpa koordinasi tim.
+- **Aesthetics & UI**: Harap gunakan komponen standar yang sudah disiapkan atau mengacu pada *Color Scheme* yang ada (`#4F64F2` sebagai *primary*) saat menambahkan layar baru agar UI tetap seragam dan memiliki nuansa modern.
+
+---
+
+## 🔄 Sinkronisasi Git (Pembaruan Kode Tim)
+
+Karena ini adalah proyek kolaborasi, Anda harus menggunakan **Git** agar pekerjaan Anda terhubung dengan *repository* utama dan anggota tim lainnya mendapatkan *update* terbaru.
+
+### 1. Mengirim (Push) Perubahan Anda ke GitHub
+Setelah Anda menyelesaikan sebuah fitur atau perbaikan (contoh: refaktor Clean Architecture), jalankan perintah berikut di terminal:
+
+```bash
+# 1. Tambahkan semua file yang berubah
+git add .
+
+# 2. Buat "checkpoint" dengan pesan yang jelas
+git commit -m "Refactor: Implementasi Clean Architecture & Notes BLoC"
+
+# 3. Kirim ke GitHub
+git push origin main
+```
+> *Catatan: Jika branch tim Anda bukan `main`, ganti kata `main` dengan nama branch yang disepakati (misalnya `dev` atau `feature/notes`).*
+
+### 2. Mengambil (Pull) Perubahan dari Anggota Tim Lain
+Sebelum Anda mulai mengetik kode (kapan pun Anda baru membuka laptop), **biasakan untuk selalu menarik data terbaru** dari GitHub agar kode Anda tidak bentrok (*conflict*) dengan kode yang dikerjakan teman Anda:
+
+```bash
+git pull origin main
+```
+
+Selamat *ngoding* bersama tim! 🚀
