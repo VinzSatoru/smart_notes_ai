@@ -144,8 +144,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: const Color(0xFFFF6B6B),
                       onTap: () {
                         Navigator.pop(bottomSheetContext);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Fitur rekaman AI akan segera hadir!')),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NoteEditorScreen(
+                              userId: userId,
+                              categories: categories,
+                              autoStartRecording: true,
+                            ),
+                          ),
                         );
                       },
                     ),

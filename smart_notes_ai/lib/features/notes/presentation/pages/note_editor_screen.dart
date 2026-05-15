@@ -4,17 +4,22 @@ import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/category.dart';
+import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
+import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_event.dart';
+import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_state.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Note? note; // If null, it's a new note (always edit mode)
   final String userId;
   final List<Category> categories;
+  final bool autoStartRecording;
 
   const NoteEditorScreen({
     super.key,
     this.note,
     required this.userId,
     required this.categories,
+    this.autoStartRecording = false,
   });
 
   @override
@@ -40,6 +45,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       if (exists) {
         _selectedCategoryId = widget.note!.categoryId;
       }
+    }
+
+    if (widget.autoStartRecording) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<AiBloc>().add(CheckQuotaAndStartRecording());
+      });
     }
   }
 
@@ -121,8 +132,28 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF4F64F2);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return BlocConsumer<AiBloc, AiState>(
+      listener: (context, state) {
+        if (state is AiSuccess) {
+          final currentText = _contentController.text;
+          final newText = currentText.isEmpty ? state.text : '$currentText\n${state.text}';
+          _contentController.text = newText;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Transkripsi berhasil ditambahkan.')),
+          );
+        } else if (state is AiFailure) {
+          if (state.isQuotaExceeded) {
+            _showUpgradeDialog(context, state.message);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        }
+      },
+      builder: (context, aiState) {
+        return Scaffold(
+          backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -268,6 +299,68 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ),
         ),
       ),
+      floatingActionButton: _isEditing ? _buildAiMicButton(aiState) : null,
+        );
+      },
+    );
+  }
+  Widget _buildAiMicButton(AiState state) {
+    bool isRecording = state is AiRecording;
+    bool isChecking = state is AiCheckingQuota;
+    bool isTranscribing = state is AiTranscribing;
+
+    if (isChecking || isTranscribing) {
+      return FloatingActionButton(
+        onPressed: null,
+        backgroundColor: Colors.grey,
+        child: const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+        ),
+      );
+    }
+
+    return FloatingActionButton(
+      onPressed: () {
+        if (isRecording) {
+          context.read<AiBloc>().add(StopRecordingAndTranscribe());
+        } else {
+          context.read<AiBloc>().add(CheckQuotaAndStartRecording());
+        }
+      },
+      backgroundColor: isRecording ? Colors.red : const Color(0xFF4F64F2),
+      child: Icon(
+        isRecording ? Icons.stop : Icons.mic,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  void _showUpgradeDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Batas Kuota Tercapai'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Nanti', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Fitur Premium akan segera hadir!')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF4F64F2)),
+            child: const Text('Upgrade ke Pro', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 }
+

@@ -44,6 +44,9 @@ dependencies:
   equatable: ^2.0.8
   get_it: ^9.2.1
   dartz: ^0.10.1
+  record: ^6.2.0
+  path_provider: ^2.1.5
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

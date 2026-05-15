@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'features/notes/presentation/bloc/notes_bloc.dart';
+import 'features/ai/presentation/bloc/ai_bloc.dart';
 import 'features/auth/presentation/pages/login_screen.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
@@ -24,6 +25,7 @@ class SmartNotesApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => di.sl<AuthBloc>()),
         BlocProvider(create: (_) => di.sl<NotesBloc>()),
+        BlocProvider(create: (_) => di.sl<AiBloc>()),
       ],
       child: MaterialApp(
           title: 'Smart Notes AI',

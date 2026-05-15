@@ -8,6 +8,13 @@ import 'package:smart_notes_ai/features/auth/domain/usecases/register_usecase.da
 import 'package:smart_notes_ai/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:smart_notes_ai/features/auth/presentation/bloc/auth_bloc.dart';
 
+import 'package:smart_notes_ai/core/services/audio_recorder_service.dart';
+import 'package:smart_notes_ai/features/ai/data/datasources/ai_remote_data_source.dart';
+import 'package:smart_notes_ai/features/ai/data/repositories/ai_repository_impl.dart';
+import 'package:smart_notes_ai/features/ai/domain/repositories/ai_repository.dart';
+import 'package:smart_notes_ai/features/ai/domain/usecases/transcribe_audio_usecase.dart';
+import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
+
 import 'package:smart_notes_ai/features/notes/presentation/bloc/notes_bloc.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/fetch_notes_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/fetch_categories_usecase.dart';
@@ -77,6 +84,32 @@ Future<void> init() async {
   sl.registerLazySingleton<NotesRemoteDataSource>(
     () => NotesRemoteDataSourceImpl(pbService: sl()),
   );
+
+  // --- Features - AI ---
+  // Bloc
+  sl.registerFactory(
+    () => AiBloc(
+      aiRepository: sl(),
+      transcribeAudioUseCase: sl(),
+      audioService: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => TranscribeAudioUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<AiRepository>(
+    () => AiRepositoryImpl(remoteDataSource: sl(), pbService: sl()),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<AiRemoteDataSource>(
+    () => AiRemoteDataSourceImpl(pbService: sl()),
+  );
+
+  // Services
+  sl.registerLazySingleton(() => AudioRecorderService());
 
   // Core & External
   sl.registerLazySingleton(() => PocketBaseService());
