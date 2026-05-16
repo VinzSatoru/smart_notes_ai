@@ -138,3 +138,22 @@ git pull origin main
 ```
 
 Selamat *ngoding* bersama tim! 🚀
+
+---
+
+## 📜 Log Pembaruan (Changelog)
+
+### Update Pada tgl 16 Mei 2026 oleh Revi Arda
+**Modernisasi Frontend & Perombakan UI/UX Total:**
+*   **Cinematic Splash Screen**: Implementasi animasi pembuka yang modern dengan efek pendaran (*glowing logo*) dan transisi bertahap.
+*   **Auth Overhaul**: Redesain halaman Login & Register menggunakan tema profesional **Blue & White**, termasuk pemulihan fitur Facebook Login.
+*   **HomeScreen Transformation**: 
+    *   Pemindahan bilah pencarian ke bagian atas untuk navigasi yang lebih bersih.
+    *   Implementasi **Sidebar (Drawer) Premium** dengan banner promo dan menu berkelompok.
+    *   Integrasi akses cepat Kalender Pintar dan filter kategori bergaya pill.
+*   **Note Editor Pro**:
+    *   Sistem latar belakang kertas dinamis (**Garis-garis, Kotak-kotak, Polos**).
+    *   Palet warna pastel yang bisa dikustomisasi untuk kenyamanan membaca.
+    *   Bilah alat (*toolbar*) lengkap di bagian bawah untuk format dan lampiran.
+    *   Fitur **Voice AI** yang ditingkatkan dengan posisi ergonomis dan sistem limitasi kuota (3x penggunaan gratis).
+*   **NoteCard Design**: Menghapus ikon emoji buku dan menggantinya dengan gaya kartu yang lebih minimalis, bersih, dan profesional.
