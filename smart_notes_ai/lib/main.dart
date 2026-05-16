@@ -4,10 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'features/notes/presentation/bloc/notes_bloc.dart';
 import 'features/ai/presentation/bloc/ai_bloc.dart';
-import 'features/auth/presentation/pages/login_screen.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
-import 'features/notes/presentation/pages/home_screen.dart';
+import 'features/auth/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 
 void main() async {
@@ -35,14 +33,7 @@ class SmartNotesApp extends StatelessWidget {
             textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
             useMaterial3: true,
           ),
-          home: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is Authenticated) {
-                return const HomeScreen();
-              }
-              return const LoginScreen();
-            },
-          ),
+          home: const SplashPage(),
       ),
     );
   }

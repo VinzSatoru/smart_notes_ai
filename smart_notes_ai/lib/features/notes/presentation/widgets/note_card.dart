@@ -20,6 +20,8 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> {
   bool _isPressed = false;
+  final Color navyColor = const Color(0xFF1E293B);
+  final Color primaryColor = const Color(0xFF4F64F2);
 
   @override
   Widget build(BuildContext context) {
@@ -34,24 +36,21 @@ class _NoteCardState extends State<NoteCard> {
     if (createdStr.isNotEmpty) {
       try {
         DateTime dt = DateTime.parse(createdStr).toLocal();
-        dateFormatted = DateFormat('dd MMM yyyy').format(dt);
+        dateFormatted = DateFormat('dd MMM yyyy').format(dt).toUpperCase();
       } catch (_) {
         dateFormatted = createdStr;
       }
     }
 
-    // Modern color palette
-    final colors = [
-      const Color(0xFFF0F4FF), // Light Blue
-      const Color(0xFFFFF0F5), // Light Pink
-      const Color(0xFFF0FFF4), // Light Green
-      const Color(0xFFFFF9F0), // Light Orange
-      const Color(0xFFF9F0FF), // Light Purple
+    // Professional pastel palette
+    final List<Map<String, Color>> palette = [
+      {'bg': const Color(0xFFF8F9FF), 'accent': const Color(0xFF4F64F2)}, // Blue
+      {'bg': const Color(0xFFFDF8FF), 'accent': const Color(0xFFA855F7)}, // Purple
+      {'bg': const Color(0xFFF8FFF9), 'accent': const Color(0xFF22C55E)}, // Green
+      {'bg': const Color(0xFFFFFBF0), 'accent': const Color(0xFFF59E0B)}, // Amber
     ];
     
-    // Pick color based on ID length to make it pseudo-random but consistent
-    final colorIndex = note.id.length % colors.length;
-    final cardColor = colors[colorIndex];
+    final colorScheme = palette[note.id.length % palette.length];
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
@@ -62,87 +61,89 @@ class _NoteCardState extends State<NoteCard> {
       onTapCancel: () => setState(() => _isPressed = false),
       onLongPress: widget.onLongPress,
       child: AnimatedScale(
-        scale: _isPressed ? 0.95 : 1.0,
+        scale: _isPressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
         child: Container(
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: navyColor.withValues(alpha: 0.05), width: 1),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (isPinned)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
-                  child: Icon(Icons.push_pin, size: 16, color: Color(0xFF4F64F2)),
-                ),
-              if (title.isNotEmpty)
-                Hero(
-                  tag: 'note_title_${note.id}',
-                  child: Material(
-                    color: Colors.transparent,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
                     child: Text(
-                      title,
-                      style: const TextStyle(
+                      title.isEmpty ? 'Catatan Tanpa Judul' : title,
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: navyColor,
+                        height: 1.2,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                ),
-              if (title.isNotEmpty && content.isNotEmpty)
-                const SizedBox(height: 8),
-              if (content.isNotEmpty)
-                Hero(
-                  tag: 'note_content_${note.id}',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      content,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                        height: 1.4,
-                      ),
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
+                  if (isPinned)
+                    Icon(Icons.push_pin_rounded, size: 14, color: primaryColor),
+                ],
+              ),
               const SizedBox(height: 12),
+              if (content.isNotEmpty)
+                Text(
+                  content,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: navyColor.withValues(alpha: 0.5),
+                    height: 1.5,
+                  ),
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     dateFormatted,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.black38,
-                      fontWeight: FontWeight.w500,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: navyColor.withValues(alpha: 0.3),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                  if (note.categoryId.isNotEmpty && note.categoryId != 'all')
-                    const Icon(Icons.folder_outlined, size: 14, color: Colors.black38),
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: colorScheme['accent']!.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 14,
+                      color: colorScheme['accent'],
+                    ),
+                  ),
                 ],
               ),
             ],
           ),
         ),
-      ),
       ),
     );
   }
