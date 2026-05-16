@@ -1,5 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:avatar_glow/avatar_glow.dart';
+import 'package:smart_notes_ai/core/widgets/mesh_background.dart';
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../../domain/entities/note.dart';
@@ -153,39 +156,47 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       },
       builder: (context, aiState) {
         return Scaffold(
-          backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-        actions: [
-          if (widget.note != null && !_isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: _deleteNote,
-              tooltip: 'Hapus Catatan',
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            backgroundColor: Colors.white.withValues(alpha: 0.6),
+            elevation: 0,
+            flexibleSpace: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(color: Colors.transparent),
+              ),
             ),
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined, color: Colors.black87),
-              onPressed: _toggleEditMode,
-              tooltip: 'Edit Catatan',
-            ),
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.check, color: primaryColor),
-              onPressed: _saveNote,
-              tooltip: 'Simpan',
-            ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            scrolledUnderElevation: 0,
+            iconTheme: const IconThemeData(color: Colors.black87),
+            actions: [
+              if (widget.note != null && !_isEditing)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  onPressed: _deleteNote,
+                  tooltip: 'Hapus Catatan',
+                ),
+              if (!_isEditing)
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: Colors.black87),
+                  onPressed: _toggleEditMode,
+                  tooltip: 'Edit Catatan',
+                ),
+              if (_isEditing)
+                IconButton(
+                  icon: const Icon(Icons.check, color: primaryColor),
+                  onPressed: _saveNote,
+                  tooltip: 'Simpan',
+                ),
+            ],
+          ),
+          body: MeshBackground(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
               // Category Dropdown (Only show in edit mode if categories exist)
               if (_isEditing && widget.categories.isNotEmpty) ...[
                 DropdownButtonHideUnderline(
@@ -217,7 +228,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
+                      color: primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -299,6 +310,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ),
         ),
       ),
+      ),
       floatingActionButton: _isEditing ? _buildAiMicButton(aiState) : null,
         );
       },
@@ -321,18 +333,23 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       );
     }
 
-    return FloatingActionButton(
-      onPressed: () {
-        if (isRecording) {
-          context.read<AiBloc>().add(StopRecordingAndTranscribe());
-        } else {
-          context.read<AiBloc>().add(CheckQuotaAndStartRecording());
-        }
-      },
-      backgroundColor: isRecording ? Colors.red : const Color(0xFF4F64F2),
-      child: Icon(
-        isRecording ? Icons.stop : Icons.mic,
-        color: Colors.white,
+    return AvatarGlow(
+      animate: isRecording,
+      glowColor: Colors.red,
+      duration: const Duration(milliseconds: 2000),
+      child: FloatingActionButton(
+        onPressed: () {
+          if (isRecording) {
+            context.read<AiBloc>().add(StopRecordingAndTranscribe());
+          } else {
+            context.read<AiBloc>().add(CheckQuotaAndStartRecording());
+          }
+        },
+        backgroundColor: isRecording ? Colors.red : const Color(0xFF4F64F2),
+        child: Icon(
+          isRecording ? Icons.stop : Icons.mic,
+          color: Colors.white,
+        ),
       ),
     );
   }

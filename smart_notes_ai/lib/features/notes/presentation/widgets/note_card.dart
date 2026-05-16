@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/note.dart';
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends StatefulWidget {
   final Note note;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
@@ -15,7 +15,15 @@ class NoteCard extends StatelessWidget {
   });
 
   @override
+  State<NoteCard> createState() => _NoteCardState();
+}
+
+class _NoteCardState extends State<NoteCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
+    final note = widget.note;
     final title = note.title;
     final content = note.contentText;
     final isPinned = note.isPinned;
@@ -46,20 +54,29 @@ class NoteCard extends StatelessWidget {
     final cardColor = colors[colorIndex];
 
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) {
+        setState(() => _isPressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _isPressed = false),
+      onLongPress: widget.onLongPress,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -125,6 +142,7 @@ class NoteCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

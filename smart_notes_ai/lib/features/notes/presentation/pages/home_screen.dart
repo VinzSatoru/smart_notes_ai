@@ -1,6 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:smart_notes_ai/core/widgets/mesh_background.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -179,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 32, color: color),
@@ -205,10 +208,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.white.withValues(alpha: 0.6),
         elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: Text(
           'Hai, $userName',
           style: const TextStyle(
@@ -239,28 +249,32 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<NotesBloc, NotesState>(
-        builder: (context, state) {
-          if (state.status == NotesStatus.failure) {
-            return Center(child: Text(state.errorMessage, style: const TextStyle(color: Colors.red)));
-          }
+      body: MeshBackground(
+        child: SafeArea(
+          child: BlocBuilder<NotesBloc, NotesState>(
+            builder: (context, state) {
+              if (state.status == NotesStatus.failure) {
+                return Center(child: Text(state.errorMessage, style: const TextStyle(color: Colors.red)));
+              }
 
-          return Column(
-            children: [
-              // Category Tabs
-              _buildCategoryTabs(context, state, userId),
-              
-              // Notes Content
-              Expanded(
-                child: state.status == NotesStatus.loading
-                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF4F64F2)))
-                    : state.notes.isEmpty
-                        ? _buildEmptyState()
-                        : _buildNotesList(context, state, userId),
-              ),
-            ],
-          );
-        },
+              return Column(
+                children: [
+                  // Category Tabs
+                  _buildCategoryTabs(context, state, userId),
+                  
+                  // Notes Content
+                  Expanded(
+                    child: state.status == NotesStatus.loading
+                        ? const Center(child: CircularProgressIndicator(color: Color(0xFF4F64F2)))
+                        : state.notes.isEmpty
+                            ? _buildEmptyState()
+                            : _buildNotesList(context, state, userId),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF4F64F2),
@@ -340,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: state.notes.length,
         itemBuilder: (context, index) {
           final note = state.notes[index];
-          return NoteCard(
+          final card = NoteCard(
             note: note,
             onTap: () {
               Navigator.push(
@@ -356,6 +370,11 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             onLongPress: () => _showNoteOptions(context, note),
           );
+          return FadeInUp(
+            duration: const Duration(milliseconds: 400),
+            delay: Duration(milliseconds: index * 50),
+            child: card,
+          );
         },
       );
     } else {
@@ -366,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final note = state.notes[index];
-          return NoteCard(
+          final card = NoteCard(
             note: note,
             onTap: () {
               Navigator.push(
@@ -381,6 +400,11 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             onLongPress: () => _showNoteOptions(context, note),
+          );
+          return FadeInUp(
+            duration: const Duration(milliseconds: 400),
+            delay: Duration(milliseconds: index * 50),
+            child: card,
           );
         },
       );
