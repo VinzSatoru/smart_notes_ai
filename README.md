@@ -143,6 +143,13 @@ Selamat *ngoding* bersama tim! 🚀
 
 ## 📜 Log Pembaruan (Changelog)
 
+### Update Pada tgl 15 Mei 2026 oleh Ahmad Novian
+**Integrasi Fitur AI Voice-to-Text & Sistem Monetisasi (Kuota Harian):**
+*   **Groq Whisper AI**: Integrasi layanan transkripsi audio canggih menggunakan model `whisper-large-v3` via API Groq dengan arsitektur bersih (*Clean Architecture*).
+*   **Perekaman Suara Lokal**: Perekaman audio menggunakan package `record` dan `path_provider` yang stabil di emulator maupun perangkat fisik.
+*   **Sistem Pembatasan Kuota & Paywall**: Pengecekan batas penggunaan harian (maksimal 3 kali rekaman gratis per hari, durasi maksimal 10 menit) yang dicatat langsung ke tabel `api_usage_logs` di PocketBase. Jika kuota habis, muncul dialog *paywall* "Upgrade ke Pro".
+*   **Polesan Visual & Animasi**: Tombol mikrofon dinamis dengan efek denyut (*pulsing glow* menggunakan `avatar_glow`), *staggered animation* (`animate_do`), dan latar belakang *Mesh Gradient* serta *Glassmorphism* yang memanjakan mata.
+
 ### Update Pada tgl 16 Mei 2026 oleh Revi Arda
 **Modernisasi Frontend & Perombakan UI/UX Total:**
 *   **Cinematic Splash Screen**: Implementasi animasi pembuka yang modern dengan efek pendaran (*glowing logo*) dan transisi bertahap.
