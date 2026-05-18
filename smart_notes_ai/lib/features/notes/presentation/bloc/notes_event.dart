@@ -54,16 +54,20 @@ class AddNoteEvent extends NotesEvent {
   final String title;
   final String contentText;
   final String categoryId;
+  final String? aiSummary;
+  final String? aiTranslation;
 
   const AddNoteEvent({
     required this.userId,
     required this.title,
     required this.contentText,
     required this.categoryId,
+    this.aiSummary,
+    this.aiTranslation,
   });
 
   @override
-  List<Object> get props => [userId, title, contentText, categoryId];
+  List<Object> get props => [userId, title, contentText, categoryId, aiSummary ?? '', aiTranslation ?? ''];
 }
 
 class UpdateNoteEvent extends NotesEvent {
@@ -72,6 +76,8 @@ class UpdateNoteEvent extends NotesEvent {
   final String contentText;
   final String categoryId;
   final String userId;
+  final String? aiSummary;
+  final String? aiTranslation;
 
   const UpdateNoteEvent({
     required this.noteId,
@@ -79,8 +85,10 @@ class UpdateNoteEvent extends NotesEvent {
     required this.contentText,
     required this.categoryId,
     required this.userId,
+    this.aiSummary,
+    this.aiTranslation,
   });
 
   @override
-  List<Object> get props => [noteId, title, contentText, categoryId, userId];
+  List<Object> get props => [noteId, title, contentText, categoryId, userId, aiSummary ?? '', aiTranslation ?? ''];
 }

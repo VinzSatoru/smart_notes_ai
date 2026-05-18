@@ -8,12 +8,15 @@ abstract class AiState extends Equatable {
 class AiIdle extends AiState {}
 class AiCheckingQuota extends AiState {}
 class AiRecording extends AiState {}
+class AiRecordingPaused extends AiState {}
 class AiTranscribing extends AiState {}
+class AiProcessingText extends AiState {}
 class AiSuccess extends AiState {
   final String text;
-  AiSuccess({required this.text});
+  final String action; // 'transcribe', 'summary', or 'translate:xx'
+  AiSuccess({required this.text, required this.action});
   @override
-  List<Object?> get props => [text];
+  List<Object?> get props => [text, action];
 }
 class AiFailure extends AiState {
   final String message;

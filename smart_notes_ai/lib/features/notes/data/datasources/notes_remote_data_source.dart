@@ -7,8 +7,8 @@ abstract class NotesRemoteDataSource {
   Future<List<NoteModel>> fetchNotes(String userId, String categoryId);
   Future<void> deleteNote(String noteId);
   Future<void> togglePin(String noteId, bool currentPinStatus);
-  Future<void> addNote(String userId, String title, String contentText, String categoryId);
-  Future<void> updateNote(String noteId, String title, String contentText, String categoryId);
+  Future<void> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
+  Future<void> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
 }
 
 class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
@@ -54,13 +54,15 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> addNote(String userId, String title, String contentText, String categoryId) async {
+  Future<void> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     final body = <String, dynamic>{
       "user_id": userId,
       "title": title,
       "content": contentText,
       "is_pinned": false,
     };
+    if (aiSummary != null) body['ai_summary'] = aiSummary;
+    if (aiTranslation != null) body['ai_translation'] = aiTranslation;
     if (categoryId != 'all' && categoryId.isNotEmpty) {
       body["category_id"] = categoryId;
     }
@@ -68,11 +70,13 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   }
 
   @override
-  Future<void> updateNote(String noteId, String title, String contentText, String categoryId) async {
+  Future<void> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     final body = <String, dynamic>{
       "title": title,
       "content": contentText,
     };
+    if (aiSummary != null) body['ai_summary'] = aiSummary;
+    if (aiTranslation != null) body['ai_translation'] = aiTranslation;
     if (categoryId != 'all' && categoryId.isNotEmpty) {
       body["category_id"] = categoryId;
     } else {

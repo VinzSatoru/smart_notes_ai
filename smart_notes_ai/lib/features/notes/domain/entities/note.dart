@@ -7,6 +7,8 @@ class Note extends Equatable {
   final bool isPinned;
   final String created;
   final String categoryId;
+  final String? aiSummary;
+  final String? aiTranslation;
 
   const Note({
     required this.id,
@@ -15,8 +17,10 @@ class Note extends Equatable {
     required this.isPinned,
     required this.created,
     required this.categoryId,
+    this.aiSummary,
+    this.aiTranslation,
   });
 
   @override
-  List<Object?> get props => [id, title, contentText, isPinned, created, categoryId];
+  List<Object?> get props => [id, title, contentText, isPinned, created, categoryId, aiSummary, aiTranslation];
 }

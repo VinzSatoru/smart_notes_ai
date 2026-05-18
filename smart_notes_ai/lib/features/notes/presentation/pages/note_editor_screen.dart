@@ -34,6 +34,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   String? _selectedCategoryId;
+  String? _summaryText;
+  String? _translateText;
+  String? _translateLang;
   
   // Theme state
   Color _currentBgColor = const Color(0xFFF8F9FF);
@@ -44,6 +47,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.contentText ?? '');
+    _summaryText = widget.note?.aiSummary;
+    _translateText = widget.note?.aiTranslation;
     
     if (widget.note != null && widget.note!.categoryId.isNotEmpty) {
       final exists = widget.categories.any((c) => c.id == widget.note!.categoryId);
@@ -81,6 +86,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
             contentText: content,
             categoryId: _selectedCategoryId ?? 'all',
+            aiSummary: _summaryText,
+            aiTranslation: _translateText,
           ));
     } else {
       context.read<NotesBloc>().add(UpdateNoteEvent(
@@ -89,6 +96,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
             contentText: content,
             categoryId: _selectedCategoryId ?? 'all',
+            aiSummary: _summaryText,
+            aiTranslation: _translateText,
           ));
     }
     
@@ -229,6 +238,166 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
+  void _showMagicAiSheet() {
+    if (_contentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('✨ Magic AI', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const CircleAvatar(backgroundColor: Color(0xFFE5DEFF), child: Icon(Icons.summarize_rounded, color: Color(0xFF4F64F2))),
+                  title: const Text('Rangkum Catatan', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Maks. 5x sehari', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.read<AiBloc>().add(ProcessTextRequested(
+                      text: _contentController.text,
+                      action: 'summary',
+                    ));
+                  },
+                ),
+                ListTile(
+                  leading: const CircleAvatar(backgroundColor: Color(0xFFD7FBE1), child: Icon(Icons.language_rounded, color: Colors.green)),
+                  title: const Text('Terjemahkan ke...', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Gratis tanpa batas', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  onTap: () {
+                    Navigator.pop(context); // Tutup sheet pertama
+                    _showLanguagePicker();  // Buka opsi bahasa
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showLanguagePicker() {
+    final List<Map<String, String>> languages = [
+      {'name': 'English', 'code': 'English'},
+      {'name': 'Indonesia', 'code': 'Indonesian'},
+      {'name': 'Jepang', 'code': 'Japanese'},
+      {'name': 'Korea', 'code': 'Korean'},
+      {'name': 'Arab', 'code': 'Arabic'},
+      {'name': 'Spanyol', 'code': 'Spanish'},
+      {'name': 'Prancis', 'code': 'French'},
+      {'name': 'Jerman', 'code': 'German'},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('🌐 Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: languages.length,
+                    itemBuilder: (context, index) {
+                      final lang = languages[index];
+                      return ListTile(
+                        title: Text(lang['name']!),
+                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                        onTap: () {
+                          Navigator.pop(context);
+                          context.read<AiBloc>().add(ProcessTextRequested(
+                            text: _contentController.text,
+                            action: 'translate:${lang['code']}',
+                          ));
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAiResultSheet(String title, String content) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                          onPressed: () => Navigator.pop(context),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Text(
+                          content,
+                          style: TextStyle(fontSize: 16, color: const Color(0xFF1E293B).withValues(alpha: 0.8), height: 1.6),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const navyColor = Color(0xFF1E293B);
@@ -239,10 +408,31 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     return BlocConsumer<AiBloc, AiState>(
       listener: (context, state) {
         if (state is AiSuccess) {
-          final currentText = _contentController.text;
-          _contentController.text = currentText.isEmpty ? state.text : '$currentText\n${state.text}';
+          if (state.action == 'transcribe') {
+            final currentText = _contentController.text;
+            _contentController.text = currentText.isEmpty ? state.text : '$currentText\n${state.text}';
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Transkripsi suara ditambahkan'), behavior: SnackBarBehavior.floating),
+            );
+          } else if (state.action == 'summary') {
+            setState(() {
+              _summaryText = state.text;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Rangkuman berhasil dibuat ✨'), behavior: SnackBarBehavior.floating),
+            );
+          } else if (state.action.startsWith('translate:')) {
+            setState(() {
+              _translateLang = state.action.split(':')[1];
+              _translateText = state.text;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Terjemahan berhasil dibuat ✨'), behavior: SnackBarBehavior.floating),
+            );
+          }
+        } else if (state is AiProcessingText) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Transkripsi suara ditambahkan'), behavior: SnackBarBehavior.floating),
+            const SnackBar(content: Text('✨ Memproses teks...'), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 1)),
           );
         } else if (state is AiFailure) {
           if (state.isQuotaExceeded) {
@@ -265,6 +455,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               onPressed: _saveNote,
             ),
             actions: [
+              IconButton(icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)), onPressed: _showMagicAiSheet),
               IconButton(icon: const Icon(Icons.undo_rounded, color: Colors.grey), onPressed: () {}),
               IconButton(icon: const Icon(Icons.redo_rounded, color: Colors.grey), onPressed: () {}),
               IconButton(icon: const Icon(Icons.ios_share_rounded, color: navyColor, size: 22), onPressed: () {}),
@@ -317,13 +508,62 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: navyColor),
                             decoration: const InputDecoration(hintText: 'Judul', hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
                             maxLines: null,
+                            contextMenuBuilder: (context, editableTextState) {
+                              return AdaptiveTextSelectionToolbar.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
                           ),
                           TextField(
                             controller: _contentController,
                             style: TextStyle(fontSize: 18, color: navyColor.withValues(alpha: 0.7), height: 1.6),
                             decoration: const InputDecoration(hintText: 'Catatan di sini', hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
                             maxLines: null,
+                            keyboardType: TextInputType.multiline,
+                            contextMenuBuilder: (context, editableTextState) {
+                              return AdaptiveTextSelectionToolbar.editableText(
+                                editableTextState: editableTextState,
+                              );
+                            },
                           ),
+                          const SizedBox(height: 24),
+                          if (_summaryText != null || _translateText != null)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (_summaryText != null)
+                                    ElevatedButton.icon(
+                                      onPressed: () => _showAiResultSheet('Rangkuman AI', _summaryText!),
+                                      icon: const Icon(Icons.summarize_rounded, color: Color(0xFF4F64F2)),
+                                      label: const Text('Lihat Rangkuman', style: TextStyle(color: Color(0xFF4F64F2))),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF4F64F2).withValues(alpha: 0.1),
+                                        elevation: 0,
+                                        alignment: Alignment.centerLeft,
+                                      ),
+                                    ),
+                                  if (_summaryText != null && _translateText != null) const SizedBox(height: 12),
+                                  if (_translateText != null)
+                                    ElevatedButton.icon(
+                                      onPressed: () => _showAiResultSheet('Terjemahan (${_translateLang ?? 'B. Lain'})', _translateText!),
+                                      icon: const Icon(Icons.language_rounded, color: Colors.green),
+                                      label: const Text('Lihat Terjemahan', style: TextStyle(color: Colors.green)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green.withValues(alpha: 0.1),
+                                        elevation: 0,
+                                        alignment: Alignment.centerLeft,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           const SizedBox(height: 100),
                         ],
                       ),
@@ -366,10 +606,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   Widget _buildFloatingMicButton(AiState state, Color primaryColor) {
     bool isRecording = state is AiRecording;
+    bool isPaused = state is AiRecordingPaused;
     bool isChecking = state is AiCheckingQuota;
     bool isTranscribing = state is AiTranscribing;
+    bool isProcessingText = state is AiProcessingText;
 
-    if (isChecking || isTranscribing) {
+    if (isChecking || isTranscribing || isProcessingText) {
       return FloatingActionButton(
         onPressed: null,
         backgroundColor: Colors.grey.shade200,
@@ -382,27 +624,45 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       );
     }
 
-    return AvatarGlow(
-      animate: isRecording,
-      glowColor: Colors.red,
-      duration: const Duration(milliseconds: 2000),
-      child: FloatingActionButton(
-        heroTag: 'note_mic_fab',
-        onPressed: () {
-          if (isRecording) {
-            context.read<AiBloc>().add(StopRecordingAndTranscribe());
-          } else {
-            context.read<AiBloc>().add(CheckQuotaAndStartRecording());
-          }
-        },
-        backgroundColor: isRecording ? Colors.red : primaryColor,
-        elevation: 4,
-        child: Icon(
-          isRecording ? Icons.stop_rounded : Icons.mic_rounded,
-          color: Colors.white,
-          size: 30,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isRecording || isPaused) ...[
+          FloatingActionButton.small(
+            heroTag: 'note_stop_fab',
+            onPressed: () {
+              context.read<AiBloc>().add(StopRecordingAndTranscribe());
+            },
+            backgroundColor: Colors.red,
+            child: const Icon(Icons.stop_rounded, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+        ],
+        AvatarGlow(
+          animate: isRecording,
+          glowColor: Colors.red,
+          duration: const Duration(milliseconds: 2000),
+          child: FloatingActionButton(
+            heroTag: 'note_mic_fab',
+            onPressed: () {
+              if (isRecording) {
+                context.read<AiBloc>().add(PauseRecording());
+              } else if (isPaused) {
+                context.read<AiBloc>().add(ResumeRecording());
+              } else {
+                context.read<AiBloc>().add(CheckQuotaAndStartRecording());
+              }
+            },
+            backgroundColor: isRecording ? Colors.red : (isPaused ? Colors.orange : primaryColor),
+            elevation: 4,
+            child: Icon(
+              isRecording ? Icons.pause_rounded : Icons.mic_rounded,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 

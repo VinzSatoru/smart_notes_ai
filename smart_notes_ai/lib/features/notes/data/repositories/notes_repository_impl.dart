@@ -51,9 +51,9 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addNote(String userId, String title, String contentText, String categoryId) async {
+  Future<Either<Failure, void>> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     try {
-      await remoteDataSource.addNote(userId, title, contentText, categoryId);
+      await remoteDataSource.addNote(userId, title, contentText, categoryId, aiSummary: aiSummary, aiTranslation: aiTranslation);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Gagal menambahkan catatan: ${e.toString()}'));
@@ -61,9 +61,9 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateNote(String noteId, String title, String contentText, String categoryId) async {
+  Future<Either<Failure, void>> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     try {
-      await remoteDataSource.updateNote(noteId, title, contentText, categoryId);
+      await remoteDataSource.updateNote(noteId, title, contentText, categoryId, aiSummary: aiSummary, aiTranslation: aiTranslation);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure('Gagal memperbarui catatan: ${e.toString()}'));

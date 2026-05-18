@@ -9,6 +9,8 @@ class NoteModel extends Note {
     required super.isPinned,
     required super.created,
     required super.categoryId,
+    super.aiSummary,
+    super.aiTranslation,
   });
 
   factory NoteModel.fromRecord(RecordModel record) {
@@ -19,6 +21,8 @@ class NoteModel extends Note {
       isPinned: record.getBoolValue('is_pinned'),
       created: record.getStringValue('created'),
       categoryId: record.getStringValue('category_id'),
+      aiSummary: record.getStringValue('ai_summary'),
+      aiTranslation: record.getStringValue('ai_translation'),
     );
   }
 }

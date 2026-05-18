@@ -164,3 +164,10 @@ Selamat *ngoding* bersama tim! 🚀
     *   Bilah alat (*toolbar*) lengkap di bagian bawah untuk format dan lampiran.
     *   Fitur **Voice AI** yang ditingkatkan dengan posisi ergonomis dan sistem limitasi kuota (3x penggunaan gratis).
 *   **NoteCard Design**: Menghapus ikon emoji buku dan menggantinya dengan gaya kartu yang lebih minimalis, bersih, dan profesional.
+
+### Update Pada tgl 18 Mei 2026 oleh Ahmad Novian
+**Integrasi Fitur Text AI (Rangkuman & Terjemahan Multibahasa):**
+*   **Magic AI (LLaMA 3.1)**: Penambahan fitur pemrosesan teks canggih menggunakan model `llama-3.1-8b-instant` dari Groq.
+*   **Fitur Rangkuman Otomatis**: Memungkinkan pengguna untuk mendapatkan inti dari catatan panjang mereka. Dibatasi 5x per hari dengan validasi kuota pada tabel `api_usage_logs` di PocketBase.
+*   **Terjemahan Multibahasa Dinamis**: Pengguna dapat menerjemahkan catatan secara gratis dan tanpa batas ke berbagai bahasa (English, Indonesia, Jepang, Korea, Arab, Spanyol, Prancis, Jerman).
+*   **Pemisahan UI Hasil AI**: Hasil Rangkuman dan Terjemahan tidak lagi ditumpuk di editor utama untuk menjaga kebersihan teks. Hasil disajikan dalam *Bottom Sheet* khusus yang interaktif, dan dapat diakses kapan pun melalui tombol "Lihat Rangkuman / Terjemahan" di bawah editor. Data ini tersimpan aman di kolom baru (`ai_summary` dan `ai_translation`) pada database PocketBase.

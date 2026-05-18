@@ -123,6 +123,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
       title: event.title,
       contentText: event.contentText,
       categoryId: event.categoryId,
+      aiSummary: event.aiSummary,
+      aiTranslation: event.aiTranslation,
     ));
 
     result.fold(
@@ -143,6 +145,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
       title: event.title,
       contentText: event.contentText,
       categoryId: event.categoryId,
+      aiSummary: event.aiSummary,
+      aiTranslation: event.aiTranslation,
     ));
 
     result.fold(

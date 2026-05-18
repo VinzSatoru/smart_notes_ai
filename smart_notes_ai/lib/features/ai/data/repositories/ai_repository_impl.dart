@@ -14,7 +14,7 @@ class AiRepositoryImpl implements AiRepository {
   });
 
   @override
-  Future<Either<String, UsageStatus>> checkUsageQuota() async {
+  Future<Either<String, UsageStatus>> checkUsageQuota({String endpoint = 'groq_whisper'}) async {
     try {
       final user = pbService.currentUser;
       if (user == null) {
@@ -30,9 +30,9 @@ class AiRepositoryImpl implements AiRepository {
         ));
       }
 
-      // Check free tier limits (Max 3 per day)
-      final todayCount = await remoteDataSource.getTodayUsageCount(user.id);
-      final maxFreeQuota = 3;
+      // Check free tier limits
+      final todayCount = await remoteDataSource.getTodayUsageCount(user.id, endpoint: endpoint);
+      final maxFreeQuota = endpoint == 'summary' ? 5 : 3;
       final remaining = maxFreeQuota - todayCount;
 
       if (remaining > 0) {
@@ -54,12 +54,12 @@ class AiRepositoryImpl implements AiRepository {
   }
 
   @override
-  Future<Either<String, void>> logUsage(int durationSeconds) async {
+  Future<Either<String, void>> logUsage(int durationSeconds, {String endpoint = 'groq_whisper'}) async {
     try {
       final user = pbService.currentUser;
       if (user == null) return const Left('Sesi tidak valid.');
       
-      await remoteDataSource.logApiUsage(user.id, 'groq_whisper', durationSeconds);
+      await remoteDataSource.logApiUsage(user.id, endpoint, durationSeconds);
       return const Right(null);
     } catch (e) {
       return Left(e.toString());
@@ -70,6 +70,16 @@ class AiRepositoryImpl implements AiRepository {
   Future<Either<String, String>> transcribeAudio(String filePath) async {
     try {
       final result = await remoteDataSource.transcribeAudio(filePath);
+      return Right(result);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, String>> processText(String text, String systemPrompt) async {
+    try {
+      final result = await remoteDataSource.processText(text, systemPrompt);
       return Right(result);
     } catch (e) {
       return Left(e.toString());

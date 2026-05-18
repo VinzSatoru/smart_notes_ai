@@ -4,9 +4,10 @@ import 'package:smart_notes_ai/core/constants/api_constants.dart';
 import 'package:smart_notes_ai/services/pocketbase_service.dart';
 
 abstract class AiRemoteDataSource {
-  Future<int> getTodayUsageCount(String userId);
+  Future<int> getTodayUsageCount(String userId, {String? endpoint});
   Future<void> logApiUsage(String userId, String endpoint, int durationSeconds);
   Future<String> transcribeAudio(String filePath);
+  Future<String> processText(String text, String systemPrompt);
 }
 
 class AiRemoteDataSourceImpl implements AiRemoteDataSource {
@@ -15,16 +16,21 @@ class AiRemoteDataSourceImpl implements AiRemoteDataSource {
   AiRemoteDataSourceImpl({required this.pbService});
 
   @override
-  Future<int> getTodayUsageCount(String userId) async {
+  Future<int> getTodayUsageCount(String userId, {String? endpoint}) async {
     final now = DateTime.now();
     // Format tanggal awal hari ini untuk filter PocketBase (YYYY-MM-DD 00:00:00)
     final todayStart = DateTime(now.year, now.month, now.day).toUtc().toIso8601String().replaceAll('T', ' ').substring(0, 19);
     
+    String filter = 'user_id = "$userId" && created >= "$todayStart"';
+    if (endpoint != null) {
+      filter += ' && endpoint = "$endpoint"';
+    }
+
     try {
       final result = await pbService.pb.collection('api_usage_logs').getList(
         page: 1,
         perPage: 1,
-        filter: 'user_id = "$userId" && created >= "$todayStart"',
+        filter: filter,
       );
       return result.totalItems;
     } catch (e) {
@@ -77,6 +83,38 @@ class AiRemoteDataSourceImpl implements AiRemoteDataSource {
       }
     } catch (e) {
       throw Exception('Gagal melakukan transkripsi: $e');
+    }
+  }
+
+  @override
+  Future<String> processText(String text, String systemPrompt) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.groqChatUrl),
+        headers: {
+          'Authorization': 'Bearer ${ApiConstants.groqApiKey}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'model': ApiConstants.groqTextModel,
+          'messages': [
+            {'role': 'system', 'content': systemPrompt},
+            {'role': 'user', 'content': text}
+          ],
+          'temperature': 0.5,
+          'max_tokens': 2048,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        final content = json['choices'][0]['message']['content'];
+        return content.toString().trim();
+      } else {
+        throw Exception('Groq API Error: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Gagal memproses teks: $e');
     }
   }
 }

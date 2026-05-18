@@ -13,6 +13,7 @@ import 'package:smart_notes_ai/features/ai/data/datasources/ai_remote_data_sourc
 import 'package:smart_notes_ai/features/ai/data/repositories/ai_repository_impl.dart';
 import 'package:smart_notes_ai/features/ai/domain/repositories/ai_repository.dart';
 import 'package:smart_notes_ai/features/ai/domain/usecases/transcribe_audio_usecase.dart';
+import 'package:smart_notes_ai/features/ai/domain/usecases/process_text_usecase.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
 
 import 'package:smart_notes_ai/features/notes/presentation/bloc/notes_bloc.dart';
@@ -91,12 +92,14 @@ Future<void> init() async {
     () => AiBloc(
       aiRepository: sl(),
       transcribeAudioUseCase: sl(),
+      processTextUseCase: sl(),
       audioService: sl(),
     ),
   );
 
   // Use cases
   sl.registerLazySingleton(() => TranscribeAudioUseCase(sl()));
+  sl.registerLazySingleton(() => ProcessTextUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AiRepository>(
