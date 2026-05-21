@@ -4,6 +4,7 @@ import 'package:avatar_glow/avatar_glow.dart';
 import 'package:intl/intl.dart';
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
+import '../bloc/notes_state.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/category.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
@@ -682,21 +683,90 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showCategoryPicker() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (context) {
-        return ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(24),
-          children: [
-            const Text('Pilih Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            ...widget.categories.map((c) => ListTile(
-              title: Text(c.name),
-              onTap: () {
-                setState(() => _selectedCategoryId = c.id);
-                Navigator.pop(context);
+      builder: (bottomSheetContext) {
+        return BlocBuilder<NotesBloc, NotesState>(
+          builder: (context, state) {
+            // Gunakan state.categories jika tersedia, jika tidak gunakan widget.categories
+            final currentCategories = state.categories.isNotEmpty ? state.categories : widget.categories;
+            
+            return ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(24),
+              children: [
+                const Text('Pilih Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: const Icon(Icons.add_circle_outline, color: Color(0xFF4F64F2)),
+                  title: const Text('Tambah Kategori', style: TextStyle(color: Color(0xFF4F64F2), fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    _showAddCategoryDialog();
+                  },
+                ),
+                const Divider(),
+                ...currentCategories.map((c) => ListTile(
+                  title: Text(c.name),
+                  trailing: _selectedCategoryId == c.id ? const Icon(Icons.check, color: Color(0xFF4F64F2)) : null,
+                  onTap: () {
+                    setState(() => _selectedCategoryId = c.id);
+                    Navigator.pop(bottomSheetContext);
+                  },
+                )),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showAddCategoryDialog() {
+    final TextEditingController categoryController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Kategori Baru', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: TextField(
+            controller: categoryController,
+            decoration: InputDecoration(
+              hintText: 'Nama kategori (mis: Ide Bisnis)',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Color(0xFF4F64F2), width: 2),
+              ),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final name = categoryController.text.trim();
+                if (name.isNotEmpty) {
+                  context.read<NotesBloc>().add(AddCategoryEvent(userId: widget.userId, name: name));
+                  Navigator.pop(dialogContext);
+                  // Optionally, we could try to auto-select it once it's created, but that might be complex
+                  // as it requires waiting for the state to update.
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Kategori "$name" ditambahkan!'), backgroundColor: Colors.green),
+                  );
+                }
               },
-            )),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4F64F2),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+            ),
           ],
         );
       },

@@ -12,6 +12,7 @@ import '../bloc/notes_state.dart';
 import '../widgets/note_card.dart';
 import 'note_editor_screen.dart';
 import 'calendar_screen.dart';
+import 'all_notes_management_screen.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/category.dart';
 
@@ -239,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: _buildDrawer(userName),
+      drawer: _buildDrawer(userName, userId),
       body: SafeArea(
         child: BlocBuilder<NotesBloc, NotesState>(
           builder: (context, state) {
@@ -439,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDrawer(String userName) {
+  Widget _buildDrawer(String userName, String userId) {
     return Drawer(
       backgroundColor: const Color(0xFFFBFBFD),
       child: SafeArea(
@@ -491,7 +492,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 children: [
                   _buildDrawerGroup([
-                    _buildDrawerItem(Icons.note_outlined, 'Semua Catatan', isSelected: true),
+                    _buildDrawerItem(Icons.note_outlined, 'Semua Catatan', isSelected: true, onTap: () {
+                      Navigator.pop(context);
+                      // Muat semua catatan sebelum pindah halaman
+                      context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId)),
+                      );
+                    }),
                     _buildDrawerItem(Icons.calendar_month_outlined, 'Kalender', onTap: () {
                       Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarScreen()));

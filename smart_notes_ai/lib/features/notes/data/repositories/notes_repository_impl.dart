@@ -69,4 +69,14 @@ class NotesRepositoryImpl implements NotesRepository {
       return Left(ServerFailure('Gagal memperbarui catatan: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> addCategory(String userId, String name) async {
+    try {
+      await remoteDataSource.addCategory(userId, name);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Gagal menambahkan kategori: ${e.toString()}'));
+    }
+  }
 }

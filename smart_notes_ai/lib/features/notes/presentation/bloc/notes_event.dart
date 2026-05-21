@@ -39,6 +39,16 @@ class DeleteNoteEvent extends NotesEvent {
   List<Object> get props => [noteId, userId];
 }
 
+class DeleteMultipleNotesEvent extends NotesEvent {
+  final List<String> noteIds;
+  final String userId;
+
+  const DeleteMultipleNotesEvent({required this.noteIds, required this.userId});
+
+  @override
+  List<Object> get props => [noteIds, userId];
+}
+
 class TogglePinEvent extends NotesEvent {
   final Note note;
   final String userId;
@@ -47,6 +57,16 @@ class TogglePinEvent extends NotesEvent {
 
   @override
   List<Object> get props => [note, userId];
+}
+
+class AddCategoryEvent extends NotesEvent {
+  final String userId;
+  final String name;
+
+  const AddCategoryEvent({required this.userId, required this.name});
+
+  @override
+  List<Object> get props => [userId, name];
 }
 
 class AddNoteEvent extends NotesEvent {

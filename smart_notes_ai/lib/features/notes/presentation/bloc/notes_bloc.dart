@@ -5,6 +5,7 @@ import '../../domain/usecases/delete_note_usecase.dart';
 import '../../domain/usecases/toggle_pin_usecase.dart';
 import '../../domain/usecases/add_note_usecase.dart';
 import '../../domain/usecases/update_note_usecase.dart';
+import '../../domain/usecases/add_category_usecase.dart';
 import 'notes_event.dart';
 import 'notes_state.dart';
 
@@ -15,6 +16,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   final TogglePinUseCase togglePinUseCase;
   final AddNoteUseCase addNoteUseCase;
   final UpdateNoteUseCase updateNoteUseCase;
+  final AddCategoryUseCase addCategoryUseCase;
 
   NotesBloc({
     required this.fetchNotesUseCase,
@@ -23,14 +25,17 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     required this.togglePinUseCase,
     required this.addNoteUseCase,
     required this.updateNoteUseCase,
+    required this.addCategoryUseCase,
   }) : super(const NotesState()) {
     on<FetchCategoriesAndNotes>(_onFetchCategoriesAndNotes);
     on<FilterNotesByCategory>(_onFilterNotesByCategory);
     on<ToggleViewMode>(_onToggleViewMode);
     on<DeleteNoteEvent>(_onDeleteNote);
+    on<DeleteMultipleNotesEvent>(_onDeleteMultipleNotes);
     on<TogglePinEvent>(_onTogglePin);
     on<AddNoteEvent>(_onAddNote);
     on<UpdateNoteEvent>(_onUpdateNote);
+    on<AddCategoryEvent>(_onAddCategory);
   }
 
   Future<void> _onFetchCategoriesAndNotes(
@@ -48,7 +53,17 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
 
     categoriesResult.fold(
       (failure) => emit(state.copyWith(status: NotesStatus.failure, errorMessage: failure.message)),
-      (categories) {
+      (categories) async {
+        // Seeding base categories jika masih kosong
+        if (categories.isEmpty) {
+          // Buat kategori default
+          await addCategoryUseCase(AddCategoryParams(userId: event.userId, name: 'Meeting'));
+          await addCategoryUseCase(AddCategoryParams(userId: event.userId, name: 'Materi'));
+          // Panggil lagi untuk memuat yang baru
+          add(FetchCategoriesAndNotes(userId: event.userId));
+          return;
+        }
+
         notesResult.fold(
           (failure) => emit(state.copyWith(status: NotesStatus.failure, errorMessage: failure.message)),
           (notes) => emit(state.copyWith(
@@ -57,6 +72,21 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
             notes: notes,
           )),
         );
+      },
+    );
+  }
+
+  Future<void> _onAddCategory(
+    AddCategoryEvent event,
+    Emitter<NotesState> emit,
+  ) async {
+    final result = await addCategoryUseCase(AddCategoryParams(userId: event.userId, name: event.name));
+
+    result.fold(
+      (failure) => emit(state.copyWith(status: NotesStatus.failure, errorMessage: failure.message)),
+      (_) {
+        // Refresh categories
+        add(FetchCategoriesAndNotes(userId: event.userId));
       },
     );
   }
@@ -97,6 +127,24 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
         add(FilterNotesByCategory(categoryId: state.selectedCategoryId, userId: event.userId));
       },
     );
+  }
+
+  Future<void> _onDeleteMultipleNotes(
+    DeleteMultipleNotesEvent event,
+    Emitter<NotesState> emit,
+  ) async {
+    emit(state.copyWith(status: NotesStatus.loading));
+    try {
+      // Execute deletions in parallel
+      await Future.wait(event.noteIds.map((id) => deleteNoteUseCase(DeleteNoteParams(noteId: id))));
+      
+      // Refetch notes
+      add(FilterNotesByCategory(categoryId: state.selectedCategoryId, userId: event.userId));
+    } catch (e) {
+      emit(state.copyWith(status: NotesStatus.failure, errorMessage: 'Gagal menghapus beberapa catatan'));
+      // Still try to refetch to get the latest accurate state
+      add(FilterNotesByCategory(categoryId: state.selectedCategoryId, userId: event.userId));
+    }
   }
 
   Future<void> _onTogglePin(

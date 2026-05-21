@@ -9,6 +9,7 @@ abstract class NotesRemoteDataSource {
   Future<void> togglePin(String noteId, bool currentPinStatus);
   Future<void> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<void> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
+  Future<void> addCategory(String userId, String name);
 }
 
 class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
@@ -20,9 +21,17 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   Future<List<CategoryModel>> fetchCategories(String userId) async {
     final records = await pbService.pb.collection('categories').getFullList(
       filter: 'user_id = "$userId"',
-      sort: '-created',
+      sort: 'created', // Diurutkan berdasarkan pembuatan, yang terlama (base) di atas
     );
     return records.map((record) => CategoryModel.fromRecord(record)).toList();
+  }
+
+  @override
+  Future<void> addCategory(String userId, String name) async {
+    await pbService.pb.collection('categories').create(body: {
+      "user_id": userId,
+      "name": name,
+    });
   }
 
   @override

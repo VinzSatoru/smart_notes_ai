@@ -23,6 +23,7 @@ import 'package:smart_notes_ai/features/notes/domain/usecases/delete_note_usecas
 import 'package:smart_notes_ai/features/notes/domain/usecases/toggle_pin_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/add_note_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/update_note_usecase.dart';
+import 'package:smart_notes_ai/features/notes/domain/usecases/add_category_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/repositories/notes_repository.dart';
 import 'package:smart_notes_ai/features/notes/data/repositories/notes_repository_impl.dart';
 import 'package:smart_notes_ai/features/notes/data/datasources/notes_remote_data_source.dart';
@@ -65,6 +66,7 @@ Future<void> init() async {
       togglePinUseCase: sl(),
       addNoteUseCase: sl(),
       updateNoteUseCase: sl(),
+      addCategoryUseCase: sl(),
     ),
   );
 
@@ -75,6 +77,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => TogglePinUseCase(sl()));
   sl.registerLazySingleton(() => AddNoteUseCase(sl()));
   sl.registerLazySingleton(() => UpdateNoteUseCase(sl()));
+  sl.registerLazySingleton(() => AddCategoryUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<NotesRepository>(

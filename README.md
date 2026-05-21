@@ -171,3 +171,15 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Fitur Rangkuman Otomatis**: Memungkinkan pengguna untuk mendapatkan inti dari catatan panjang mereka. Dibatasi 5x per hari dengan validasi kuota pada tabel `api_usage_logs` di PocketBase.
 *   **Terjemahan Multibahasa Dinamis**: Pengguna dapat menerjemahkan catatan secara gratis dan tanpa batas ke berbagai bahasa (English, Indonesia, Jepang, Korea, Arab, Spanyol, Prancis, Jerman).
 *   **Pemisahan UI Hasil AI**: Hasil Rangkuman dan Terjemahan tidak lagi ditumpuk di editor utama untuk menjaga kebersihan teks. Hasil disajikan dalam *Bottom Sheet* khusus yang interaktif, dan dapat diakses kapan pun melalui tombol "Lihat Rangkuman / Terjemahan" di bawah editor. Data ini tersimpan aman di kolom baru (`ai_summary` dan `ai_translation`) pada database PocketBase.
+
+### Update Pada tgl 21 Mei 2026 oleh Revi Arda
+**Fitur Kategori Kustom & Manajemen Semua Catatan:**
+*   **Kategori Kustom Dinamis**: Pengguna kini dapat membuat kategori baru (mis. "Ide Bisnis") langsung dari panel saat membuat atau mengedit catatan.
+*   **Seeding Kategori Cerdas**: Aplikasi secara otomatis membuatkan kategori dasar ("Meeting" & "Materi") bagi pengguna baru jika database masih kosong, mencegah kekosongan tampilan.
+*   **Layar Manajemen Semua Catatan (`AllNotesManagementScreen`)**: 
+    *   Membuka kunci akses menu *sidebar* "Semua Catatan" menuju layar manajemen khusus.
+    *   Implementasi sistem **Multi-select** (pilih jamak) menggunakan interaksi *long press* (tekan & tahan).
+    *   Aksi penghapusan massal (*Bulk Delete*) catatan dengan sinkronisasi ke backend PocketBase secara paralel.
+    *   Desain kartu yang diperkaya dengan **Label Kategori** bergaya pil biru dan presisi **Tanggal Pembuatan**.
+    *   Tombol *toggle* untuk beralih antara tampilan *List* dan *Grid* (*Masonry*) tanpa menghilangkan fitur manajemen.
+    *   Penanganan *layout overflow* tingkat lanjut saat beralih antara mode seleksi dan grid.
