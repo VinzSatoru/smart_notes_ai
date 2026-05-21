@@ -117,10 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                title: const Text('Hapus Catatan', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                title: const Text('Buang ke Sampah', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
-                  context.read<NotesBloc>().add(DeleteNoteEvent(noteId: note.id, userId: userId));
+                  context.read<NotesBloc>().add(MoveToTrashEvent(note: note));
                 },
               ),
               const SizedBox(height: 12),
@@ -418,8 +418,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNotesList(BuildContext context, NotesState state, String userId) {
-    // Sembunyikan catatan yang diarsipkan dari layar utama
-    final displayNotes = state.notes.where((note) => !note.isArchived).toList();
+    // Sembunyikan catatan yang diarsipkan atau dibuang ke sampah dari layar utama
+    final displayNotes = state.notes.where((note) => !note.isArchived && !note.isTrashed).toList();
 
     if (displayNotes.isEmpty) {
       return _buildEmptyState();
@@ -543,7 +543,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId, filterFavorite: true)),
                       );
                     }),
-                    _buildDrawerItem(Icons.tag_rounded, 'Tag'),
                     _buildDrawerItem(Icons.archive_outlined, 'Arsip', onTap: () {
                       Navigator.pop(context);
                       context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
@@ -552,7 +551,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId, filterArchive: true)),
                       );
                     }),
-                    _buildDrawerItem(Icons.delete_outline_rounded, 'Sampah'),
+                    _buildDrawerItem(Icons.delete_outline_rounded, 'Sampah', onTap: () {
+                      Navigator.pop(context);
+                      context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId, filterTrash: true)),
+                      );
+                    }),
                   ]),
                   const SizedBox(height: 16),
                   _buildDrawerGroup([

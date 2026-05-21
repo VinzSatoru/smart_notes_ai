@@ -29,14 +29,32 @@ class FilterNotesByCategory extends NotesEvent {
 
 class ToggleViewMode extends NotesEvent {}
 
-class DeleteNoteEvent extends NotesEvent {
+class PermanentDeleteNoteEvent extends NotesEvent {
   final String noteId;
   final String userId;
 
-  const DeleteNoteEvent({required this.noteId, required this.userId});
+  const PermanentDeleteNoteEvent({required this.noteId, required this.userId});
 
   @override
   List<Object> get props => [noteId, userId];
+}
+
+class MoveToTrashEvent extends NotesEvent {
+  final Note note;
+
+  const MoveToTrashEvent({required this.note});
+
+  @override
+  List<Object> get props => [note];
+}
+
+class RestoreNoteEvent extends NotesEvent {
+  final Note note;
+
+  const RestoreNoteEvent({required this.note});
+
+  @override
+  List<Object> get props => [note];
 }
 
 class DeleteMultipleNotesEvent extends NotesEvent {

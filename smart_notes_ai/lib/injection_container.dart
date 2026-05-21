@@ -26,6 +26,8 @@ import 'package:smart_notes_ai/features/notes/domain/usecases/update_note_usecas
 import 'package:smart_notes_ai/features/notes/domain/usecases/add_category_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/toggle_favorite_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/usecases/toggle_archive_usecase.dart';
+import 'package:smart_notes_ai/features/notes/domain/usecases/move_to_trash_usecase.dart';
+import 'package:smart_notes_ai/features/notes/domain/usecases/restore_note_usecase.dart';
 import 'package:smart_notes_ai/features/notes/domain/repositories/notes_repository.dart';
 import 'package:smart_notes_ai/features/notes/data/repositories/notes_repository_impl.dart';
 import 'package:smart_notes_ai/features/notes/data/datasources/notes_remote_data_source.dart';
@@ -71,6 +73,8 @@ Future<void> init() async {
       addCategoryUseCase: sl(),
       toggleFavoriteUseCase: sl(),
       toggleArchiveUseCase: sl(),
+      moveToTrashUseCase: sl(),
+      restoreNoteUseCase: sl(),
     ),
   );
 
@@ -84,6 +88,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddCategoryUseCase(sl()));
   sl.registerLazySingleton(() => ToggleFavoriteUseCase(sl()));
   sl.registerLazySingleton(() => ToggleArchiveUseCase(sl()));
+  sl.registerLazySingleton(() => MoveToTrashUseCase(sl()));
+  sl.registerLazySingleton(() => RestoreNoteUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<NotesRepository>(

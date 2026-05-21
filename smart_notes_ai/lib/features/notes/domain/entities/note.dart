@@ -9,6 +9,7 @@ class Note extends Equatable {
   final String categoryId;
   final bool isFavorite;
   final bool isArchived;
+  final bool isTrashed;
   final String? aiSummary;
   final String? aiTranslation;
 
@@ -21,6 +22,7 @@ class Note extends Equatable {
     required this.categoryId,
     this.isFavorite = false,
     this.isArchived = false,
+    this.isTrashed = false,
     this.aiSummary,
     this.aiTranslation,
   });
@@ -35,6 +37,7 @@ class Note extends Equatable {
         categoryId,
         isFavorite,
         isArchived,
+        isTrashed,
         aiSummary,
         aiTranslation,
       ];

@@ -71,6 +71,26 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
+  Future<Either<Failure, void>> moveToTrash(Note note) async {
+    try {
+      await remoteDataSource.moveToTrash(note.id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Gagal membuang catatan ke sampah: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> restoreNote(Note note) async {
+    try {
+      await remoteDataSource.restoreNote(note.id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Gagal memulihkan catatan: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     try {
       await remoteDataSource.addNote(userId, title, contentText, categoryId, aiSummary: aiSummary, aiTranslation: aiTranslation);

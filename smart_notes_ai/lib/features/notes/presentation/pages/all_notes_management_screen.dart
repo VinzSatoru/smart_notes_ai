@@ -13,12 +13,14 @@ class AllNotesManagementScreen extends StatefulWidget {
   final String userId;
   final bool filterFavorite;
   final bool filterArchive;
+  final bool filterTrash;
 
   const AllNotesManagementScreen({
     super.key,
     required this.userId,
     this.filterFavorite = false,
     this.filterArchive = false,
+    this.filterTrash = false,
   });
 
   @override
@@ -113,9 +115,11 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
         title: Text(
           _isSelectionMode 
             ? '${_selectedNoteIds.length} Dipilih' 
-            : (widget.filterArchive 
-                ? 'Catatan Arsip' 
-                : (widget.filterFavorite ? 'Catatan Favorit' : 'Semua Catatan')),
+            : (widget.filterTrash 
+                ? 'Sampah' 
+                : (widget.filterArchive 
+                    ? 'Catatan Arsip' 
+                    : (widget.filterFavorite ? 'Catatan Favorit' : 'Semua Catatan'))),
           style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
@@ -145,15 +149,22 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
           }
 
           var displayNotes = state.notes;
-          if (widget.filterArchive) {
-            displayNotes = displayNotes.where((note) => note.isArchived).toList();
+          
+          if (widget.filterTrash) {
+            displayNotes = displayNotes.where((note) => note.isTrashed).toList();
           } else {
-            // Sembunyikan arsip jika tidak dalam mode arsip
-            displayNotes = displayNotes.where((note) => !note.isArchived).toList();
-          }
+            // Sembunyikan catatan di sampah jika tidak sedang di mode Sampah
+            displayNotes = displayNotes.where((note) => !note.isTrashed).toList();
+            
+            if (widget.filterArchive) {
+              displayNotes = displayNotes.where((note) => note.isArchived).toList();
+            } else {
+              displayNotes = displayNotes.where((note) => !note.isArchived).toList();
+            }
 
-          if (widget.filterFavorite) {
-            displayNotes = displayNotes.where((note) => note.isFavorite).toList();
+            if (widget.filterFavorite) {
+              displayNotes = displayNotes.where((note) => note.isFavorite).toList();
+            }
           }
 
           if (displayNotes.isEmpty) {
@@ -162,13 +173,13 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    widget.filterArchive ? Icons.archive_outlined : (widget.filterFavorite ? Icons.star_outline : Icons.note_alt_outlined), 
+                    widget.filterTrash ? Icons.delete_outline_rounded : (widget.filterArchive ? Icons.archive_outlined : (widget.filterFavorite ? Icons.star_outline : Icons.note_alt_outlined)), 
                     size: 64, 
                     color: Colors.grey.shade300
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    widget.filterArchive ? 'Belum ada catatan yang diarsipkan' : (widget.filterFavorite ? 'Belum ada catatan favorit' : 'Belum ada catatan'), 
+                    widget.filterTrash ? 'Sampah kosong' : (widget.filterArchive ? 'Belum ada catatan yang diarsipkan' : (widget.filterFavorite ? 'Belum ada catatan favorit' : 'Belum ada catatan')), 
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 16)
                   ),
                 ],
@@ -210,7 +221,13 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
     final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(parsedDate.toLocal());
 
     return GestureDetector(
-      onLongPress: () => _toggleSelection(note.id),
+      onLongPress: () {
+        if (widget.filterTrash) {
+          _showTrashOptions(context, note);
+        } else {
+          _toggleSelection(note.id);
+        }
+      },
       onTap: () {
         if (_isSelectionMode) {
           _toggleSelection(note.id);
@@ -225,6 +242,13 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
               ),
             ),
           );
+        }
+      },
+      onSecondaryTap: () {
+        if (widget.filterTrash) {
+          _showTrashOptions(context, note);
+        } else {
+          _showNoteOptions(context, note);
         }
       },
       child: AnimatedContainer(
@@ -315,6 +339,122 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                     ),
                   ),
                 ),
+    );
+  }
+
+  void _showNoteOptions(BuildContext context, Note note) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              ListTile(
+                leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin, color: primaryColor),
+                title: Text(note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(TogglePinEvent(note: note, userId: widget.userId));
+                },
+              ),
+              ListTile(
+                leading: Icon(note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded, color: const Color(0xFFF59E0B)),
+                title: Text(note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(ToggleFavoriteEvent(note: note));
+                },
+              ),
+              ListTile(
+                leading: Icon(note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined, color: Colors.teal),
+                title: Text(note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(ToggleArchiveEvent(note: note));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                title: const Text('Buang ke Sampah', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(MoveToTrashEvent(note: note));
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTrashOptions(BuildContext context, Note note) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 20), decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                ListTile(
+                  leading: Icon(Icons.restore, color: navyColor),
+                  title: Text('Pulihkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    context.read<NotesBloc>().add(RestoreNoteEvent(note: note));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.redAccent),
+                  title: const Text('Hapus Permanen', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    _showPermanentDeleteConfirmation(context, note);
+                  },
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showPermanentDeleteConfirmation(BuildContext context, Note note) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text('Hapus Permanen?', style: TextStyle(color: navyColor, fontWeight: FontWeight.bold)),
+          content: const Text('Catatan yang dihapus permanen tidak dapat dipulihkan kembali.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('Batal', style: TextStyle(color: Colors.grey.shade600)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.read<NotesBloc>().add(PermanentDeleteNoteEvent(noteId: note.id, userId: widget.userId));
+              },
+              child: const Text('Hapus', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

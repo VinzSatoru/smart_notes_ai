@@ -10,6 +10,7 @@ import '../../domain/entities/category.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_event.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_state.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum PaperPattern { none, ruled, grid }
 
@@ -38,6 +39,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   String? _summaryText;
   String? _translateText;
   String? _translateLang;
+  late UndoHistoryController _undoController;
   
   // Theme state
   Color _currentBgColor = const Color(0xFFF8F9FF);
@@ -48,6 +50,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
     _contentController = TextEditingController(text: widget.note?.contentText ?? '');
+    _undoController = UndoHistoryController();
     _summaryText = widget.note?.aiSummary;
     _translateText = widget.note?.aiTranslation;
     
@@ -69,6 +72,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    _undoController.dispose();
     super.dispose();
   }
 
@@ -138,6 +142,84 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _shareNote() {
+    final title = _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : 'Catatan Tanpa Judul';
+    final content = _contentController.text.trim();
+    if (content.isEmpty && title == 'Catatan Tanpa Judul') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+    
+    final shareText = '$title\n\n$content';
+    Share.share(shareText);
+  }
+
+  void _showMoreOptions() {
+    if (widget.note == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Simpan catatan terlebih dahulu untuk opsi tambahan.'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (bottomSheetContext) {
+        return BlocBuilder<NotesBloc, NotesState>(
+          builder: (context, state) {
+            final matchingNotes = state.notes.where((n) => n.id == widget.note!.id);
+            final note = matchingNotes.isNotEmpty ? matchingNotes.first : widget.note!;
+            
+            return SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                  ListTile(
+                    leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin, color: const Color(0xFF4F64F2)),
+                    title: Text(note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      context.read<NotesBloc>().add(TogglePinEvent(note: note, userId: widget.userId));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded, color: const Color(0xFFF59E0B)),
+                    title: Text(note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      context.read<NotesBloc>().add(ToggleFavoriteEvent(note: note));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined, color: Colors.teal),
+                    title: Text(note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      context.read<NotesBloc>().add(ToggleArchiveEvent(note: note));
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    title: const Text('Buang ke Sampah', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      Navigator.pop(bottomSheetContext);
+                      Navigator.pop(this.context);
+                      context.read<NotesBloc>().add(MoveToTrashEvent(note: note));
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            );
+          }
+        );
+      },
     );
   }
 
@@ -457,10 +539,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             ),
             actions: [
               IconButton(icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)), onPressed: _showMagicAiSheet),
-              IconButton(icon: const Icon(Icons.undo_rounded, color: Colors.grey), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.redo_rounded, color: Colors.grey), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.ios_share_rounded, color: navyColor, size: 22), onPressed: () {}),
-              IconButton(icon: const Icon(Icons.more_vert_rounded, color: navyColor), onPressed: () {}),
+              ValueListenableBuilder<UndoHistoryValue>(
+                valueListenable: _undoController,
+                builder: (context, value, child) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.undo_rounded, color: value.canUndo ? navyColor : Colors.grey),
+                        onPressed: value.canUndo ? () => _undoController.undo() : null,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.redo_rounded, color: value.canRedo ? navyColor : Colors.grey),
+                        onPressed: value.canRedo ? () => _undoController.redo() : null,
+                      ),
+                    ],
+                  );
+                },
+              ),
+              IconButton(icon: const Icon(Icons.ios_share_rounded, color: navyColor, size: 22), onPressed: _shareNote),
+              IconButton(icon: const Icon(Icons.more_vert_rounded, color: navyColor), onPressed: _showMoreOptions),
             ],
           ),
           body: Stack(
@@ -517,6 +615,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                           ),
                           TextField(
                             controller: _contentController,
+                            undoController: _undoController,
                             style: TextStyle(fontSize: 18, color: navyColor.withValues(alpha: 0.7), height: 1.6),
                             decoration: const InputDecoration(hintText: 'Catatan di sini', hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
                             maxLines: null,

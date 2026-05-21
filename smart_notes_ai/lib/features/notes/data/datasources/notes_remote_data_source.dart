@@ -9,6 +9,8 @@ abstract class NotesRemoteDataSource {
   Future<void> togglePin(String noteId, bool currentPinStatus);
   Future<void> toggleFavorite(String noteId, bool currentFavoriteStatus);
   Future<void> toggleArchive(String noteId, bool currentArchiveStatus);
+  Future<void> moveToTrash(String noteId);
+  Future<void> restoreNote(String noteId);
   Future<void> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<void> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<void> addCategory(String userId, String name);
@@ -75,6 +77,20 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   Future<void> toggleArchive(String noteId, bool currentArchiveStatus) async {
     await pbService.pb.collection('notes').update(noteId, body: {
       "is_archived": !currentArchiveStatus,
+    });
+  }
+
+  @override
+  Future<void> moveToTrash(String noteId) async {
+    await pbService.pb.collection('notes').update(noteId, body: {
+      "is_trashed": true,
+    });
+  }
+
+  @override
+  Future<void> restoreNote(String noteId) async {
+    await pbService.pb.collection('notes').update(noteId, body: {
+      "is_trashed": false,
     });
   }
 

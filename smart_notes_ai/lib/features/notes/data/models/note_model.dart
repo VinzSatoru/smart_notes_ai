@@ -11,6 +11,7 @@ class NoteModel extends Note {
     required super.categoryId,
     super.isFavorite,
     super.isArchived,
+    super.isTrashed,
     super.aiSummary,
     super.aiTranslation,
   });
@@ -25,6 +26,7 @@ class NoteModel extends Note {
       categoryId: record.getStringValue('category_id'),
       isFavorite: record.getBoolValue('is_favorite'),
       isArchived: record.getBoolValue('is_archived'),
+      isTrashed: record.getBoolValue('is_trashed'),
       aiSummary: record.getStringValue('ai_summary'),
       aiTranslation: record.getStringValue('ai_translation'),
     );

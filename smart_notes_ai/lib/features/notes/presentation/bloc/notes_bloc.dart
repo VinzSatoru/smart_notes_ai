@@ -8,6 +8,8 @@ import '../../domain/usecases/update_note_usecase.dart';
 import '../../domain/usecases/add_category_usecase.dart';
 import '../../domain/usecases/toggle_favorite_usecase.dart';
 import '../../domain/usecases/toggle_archive_usecase.dart';
+import '../../domain/usecases/move_to_trash_usecase.dart';
+import '../../domain/usecases/restore_note_usecase.dart';
 import 'notes_event.dart';
 import 'notes_state.dart';
 import '../../domain/entities/note.dart';
@@ -22,6 +24,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   final AddCategoryUseCase addCategoryUseCase;
   final ToggleFavoriteUseCase toggleFavoriteUseCase;
   final ToggleArchiveUseCase toggleArchiveUseCase;
+  final MoveToTrashUseCase moveToTrashUseCase;
+  final RestoreNoteUseCase restoreNoteUseCase;
 
   NotesBloc({
     required this.fetchNotesUseCase,
@@ -33,11 +37,15 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     required this.addCategoryUseCase,
     required this.toggleFavoriteUseCase,
     required this.toggleArchiveUseCase,
+    required this.moveToTrashUseCase,
+    required this.restoreNoteUseCase,
   }) : super(const NotesState()) {
     on<FetchCategoriesAndNotes>(_onFetchCategoriesAndNotes);
     on<FilterNotesByCategory>(_onFilterNotesByCategory);
     on<ToggleViewMode>(_onToggleViewMode);
-    on<DeleteNoteEvent>(_onDeleteNote);
+    on<PermanentDeleteNoteEvent>(_onPermanentDeleteNote);
+    on<MoveToTrashEvent>(_onMoveToTrash);
+    on<RestoreNoteEvent>(_onRestoreNote);
     on<DeleteMultipleNotesEvent>(_onDeleteMultipleNotes);
     on<TogglePinEvent>(_onTogglePin);
     on<ToggleFavoriteEvent>(_onToggleFavorite);
@@ -123,8 +131,8 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
     emit(state.copyWith(isGridView: !state.isGridView));
   }
 
-  Future<void> _onDeleteNote(
-    DeleteNoteEvent event,
+  Future<void> _onPermanentDeleteNote(
+    PermanentDeleteNoteEvent event,
     Emitter<NotesState> emit,
   ) async {
     final result = await deleteNoteUseCase(DeleteNoteParams(noteId: event.noteId));
@@ -135,6 +143,56 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
         // Refetch notes to ensure state is synchronized with DB
         add(FilterNotesByCategory(categoryId: state.selectedCategoryId, userId: event.userId));
       },
+    );
+  }
+
+  Future<void> _onMoveToTrash(
+    MoveToTrashEvent event,
+    Emitter<NotesState> emit,
+  ) async {
+    final updatedNotes = state.notes.map((note) {
+      if (note.id == event.note.id) {
+        return Note(
+          id: note.id, title: note.title, contentText: note.contentText,
+          isPinned: note.isPinned, isFavorite: note.isFavorite, isArchived: note.isArchived,
+          isTrashed: true, created: note.created, categoryId: note.categoryId,
+          aiSummary: note.aiSummary, aiTranslation: note.aiTranslation,
+        );
+      }
+      return note;
+    }).toList();
+
+    emit(state.copyWith(notes: updatedNotes));
+
+    final result = await moveToTrashUseCase(event.note);
+    result.fold(
+      (failure) { emit(state.copyWith(notes: state.notes)); },
+      (_) {},
+    );
+  }
+
+  Future<void> _onRestoreNote(
+    RestoreNoteEvent event,
+    Emitter<NotesState> emit,
+  ) async {
+    final updatedNotes = state.notes.map((note) {
+      if (note.id == event.note.id) {
+        return Note(
+          id: note.id, title: note.title, contentText: note.contentText,
+          isPinned: note.isPinned, isFavorite: note.isFavorite, isArchived: note.isArchived,
+          isTrashed: false, created: note.created, categoryId: note.categoryId,
+          aiSummary: note.aiSummary, aiTranslation: note.aiTranslation,
+        );
+      }
+      return note;
+    }).toList();
+
+    emit(state.copyWith(notes: updatedNotes));
+
+    final result = await restoreNoteUseCase(event.note);
+    result.fold(
+      (failure) { emit(state.copyWith(notes: state.notes)); },
+      (_) {},
     );
   }
 
@@ -185,6 +243,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           isPinned: note.isPinned,
           isFavorite: !note.isFavorite,
           isArchived: note.isArchived,
+          isTrashed: note.isTrashed,
           created: note.created,
           categoryId: note.categoryId,
           aiSummary: note.aiSummary,
@@ -221,6 +280,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           isPinned: note.isPinned,
           isFavorite: note.isFavorite,
           isArchived: !note.isArchived,
+          isTrashed: note.isTrashed,
           created: note.created,
           categoryId: note.categoryId,
           aiSummary: note.aiSummary,

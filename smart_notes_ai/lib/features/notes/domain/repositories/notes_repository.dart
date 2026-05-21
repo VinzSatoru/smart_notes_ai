@@ -10,6 +10,8 @@ abstract class NotesRepository {
   Future<Either<Failure, void>> togglePin(Note note);
   Future<Either<Failure, void>> toggleFavorite(Note note);
   Future<Either<Failure, void>> toggleArchive(Note note);
+  Future<Either<Failure, void>> moveToTrash(Note note);
+  Future<Either<Failure, void>> restoreNote(Note note);
   Future<Either<Failure, void>> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<Either<Failure, void>> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<Either<Failure, void>> addCategory(String userId, String name);
