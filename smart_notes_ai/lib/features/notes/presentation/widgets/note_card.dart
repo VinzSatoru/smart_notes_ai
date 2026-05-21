@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/note.dart';
+import 'dart:convert';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class NoteCard extends StatefulWidget {
   final Note note;
@@ -30,6 +32,17 @@ class _NoteCardState extends State<NoteCard> {
     final content = note.contentText;
     final isPinned = note.isPinned;
     final createdStr = note.created;
+    
+    String displayContent = content;
+    if (content.trim().startsWith('[') && content.trim().endsWith(']')) {
+      try {
+        final decoded = jsonDecode(content);
+        final doc = quill.Document.fromJson(decoded);
+        displayContent = doc.toPlainText().trim();
+      } catch (e) {
+        // Fallback to original content
+      }
+    }
     
     // Format tanggal
     String dateFormatted = '';
@@ -110,9 +123,9 @@ class _NoteCardState extends State<NoteCard> {
                 ],
               ),
               const SizedBox(height: 12),
-              if (content.isNotEmpty)
+              if (displayContent.isNotEmpty)
                 Text(
-                  content,
+                  displayContent,
                   style: TextStyle(
                     fontSize: 14,
                     color: navyColor.withValues(alpha: 0.5),

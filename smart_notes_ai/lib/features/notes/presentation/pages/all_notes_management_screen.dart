@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'dart:convert';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../bloc/notes_bloc.dart';
 import '../bloc/notes_event.dart';
 import '../bloc/notes_state.dart';
@@ -220,6 +222,15 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
     final parsedDate = DateTime.tryParse(note.created) ?? DateTime.now();
     final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(parsedDate.toLocal());
 
+    String displayContent = note.contentText;
+    if (displayContent.trim().startsWith('[') && displayContent.trim().endsWith(']')) {
+      try {
+        final decoded = jsonDecode(displayContent);
+        final doc = quill.Document.fromJson(decoded);
+        displayContent = doc.toPlainText().trim();
+      } catch (_) {}
+    }
+
     return GestureDetector(
       onLongPress: () {
         if (widget.filterTrash) {
@@ -307,8 +318,8 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              Text(
-                                note.contentText.isNotEmpty ? note.contentText : 'Catatan kosong...',
+                               Text(
+                                displayContent.isNotEmpty ? displayContent : 'Catatan kosong...',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: navyColor.withValues(alpha: 0.6),

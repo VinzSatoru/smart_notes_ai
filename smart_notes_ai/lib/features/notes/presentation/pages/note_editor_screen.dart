@@ -11,6 +11,14 @@ import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_bloc.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_event.dart';
 import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_state.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:async';
+import 'package:image_picker/image_picker.dart';
+
+const Color navyColor = Color(0xFF1E293B);
+const Color primaryColor = Color(0xFF4F64F2);
 
 enum PaperPattern { none, ruled, grid }
 
@@ -34,11 +42,16 @@ class NoteEditorScreen extends StatefulWidget {
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late TextEditingController _titleController;
-  late TextEditingController _contentController;
+  late quill.QuillController _quillController;
+  final FocusNode _editorFocusNode = FocusNode();
   String? _selectedCategoryId;
   String? _summaryText;
   String? _translateText;
   String? _translateLang;
+  
+  Timer? _recordTimer;
+  final ValueNotifier<int> _recordDuration = ValueNotifier<int>(0);
+
   late UndoHistoryController _undoController;
   
   // Theme state
@@ -49,8 +62,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
-    _contentController = TextEditingController(text: widget.note?.contentText ?? '');
-    _undoController = UndoHistoryController();
+    
+    quill.Document document;
+    final initialContent = widget.note?.contentText ?? '';
+    if (initialContent.trim().startsWith('[') && initialContent.trim().endsWith(']')) {
+      try {
+        final decoded = jsonDecode(initialContent);
+        document = quill.Document.fromJson(decoded);
+      } catch (e) {
+        document = quill.Document()..insert(0, initialContent);
+      }
+    } else {
+      document = quill.Document()..insert(0, initialContent);
+    }
+
+    _quillController = quill.QuillController(
+      document: document,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    
+    _undoController = UndoHistoryController(); // Used only for title now if needed, but we might remove it. Let's keep it for compatibility.
     _summaryText = widget.note?.aiSummary;
     _translateText = widget.note?.aiTranslation;
     
@@ -70,17 +101,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   void dispose() {
+    _recordTimer?.cancel();
+    _recordDuration.dispose();
     _titleController.dispose();
-    _contentController.dispose();
+    _quillController.dispose();
+    _editorFocusNode.dispose();
     _undoController.dispose();
     super.dispose();
   }
 
   void _saveNote() {
     final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
+    final contentPlainText = _quillController.document.toPlainText().trim();
+    final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
 
-    if (title.isEmpty && content.isEmpty) {
+    if (title.isEmpty && contentPlainText.isEmpty) {
       Navigator.pop(context);
       return;
     }
@@ -89,7 +124,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       context.read<NotesBloc>().add(AddNoteEvent(
             userId: widget.userId,
             title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
-            contentText: content,
+            contentText: contentJson,
             categoryId: _selectedCategoryId ?? 'all',
             aiSummary: _summaryText,
             aiTranslation: _translateText,
@@ -99,7 +134,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             noteId: widget.note!.id,
             userId: widget.userId,
             title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
-            contentText: content,
+            contentText: contentJson,
             categoryId: _selectedCategoryId ?? 'all',
             aiSummary: _summaryText,
             aiTranslation: _translateText,
@@ -147,7 +182,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   void _shareNote() {
     final title = _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : 'Catatan Tanpa Judul';
-    final content = _contentController.text.trim();
+    final content = _quillController.document.toPlainText().trim();
     if (content.isEmpty && title == 'Catatan Tanpa Judul') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
@@ -157,6 +192,73 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     
     final shareText = '$title\n\n$content';
     Share.share(shareText);
+  }
+
+  void _showFormatToolbar() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Format Teks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: navyColor)),
+              const SizedBox(height: 16),
+              quill.QuillToolbar.simple(
+                configurations: quill.QuillSimpleToolbarConfigurations(
+                  controller: _quillController,
+                  sharedConfigurations: const quill.QuillSharedConfigurations(
+                    locale: Locale('id'),
+                  ),
+                  showUndo: false,
+                  showRedo: false,
+                  showFontFamily: false,
+                  showFontSize: false,
+                  showColorButton: false,
+                  showBackgroundColorButton: false,
+                  showSearchButton: false,
+                  showSubscript: false,
+                  showSuperscript: false,
+                  showInlineCode: false,
+                  showCodeBlock: false,
+                  showClearFormat: false,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _toggleChecklist() {
+    final isChecked = _quillController.getSelectionStyle().containsKey(quill.Attribute.unchecked.key) ||
+        _quillController.getSelectionStyle().containsKey(quill.Attribute.checked.key);
+    _quillController.formatSelection(isChecked ? quill.Attribute.clone(quill.Attribute.unchecked, null) : quill.Attribute.unchecked);
+  }
+
+  void _toggleBulletList() {
+    final isList = _quillController.getSelectionStyle().containsKey(quill.Attribute.ul.key);
+    _quillController.formatSelection(isList ? quill.Attribute.clone(quill.Attribute.ul, null) : quill.Attribute.ul);
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final index = _quillController.selection.baseOffset;
+      final length = _quillController.selection.extentOffset - index;
+      _quillController.replaceText(index, length, quill.BlockEmbed.image(pickedFile.path), null);
+    }
+  }
+
+  void _showNotSupported(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
   }
 
   void _showMoreOptions() {
@@ -322,7 +424,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _showMagicAiSheet() {
-    if (_contentController.text.trim().isEmpty) {
+    if (_quillController.document.toPlainText().trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
       );
@@ -353,7 +455,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   onTap: () {
                     Navigator.pop(context);
                     context.read<AiBloc>().add(ProcessTextRequested(
-                      text: _contentController.text,
+                      text: _quillController.document.toPlainText(),
                       action: 'summary',
                     ));
                   },
@@ -416,7 +518,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         onTap: () {
                           Navigator.pop(context);
                           context.read<AiBloc>().add(ProcessTextRequested(
-                            text: _contentController.text,
+                            text: _quillController.document.toPlainText(),
                             action: 'translate:${lang['code']}',
                           ));
                         },
@@ -483,17 +585,32 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const navyColor = Color(0xFF1E293B);
-    const primaryColor = Color(0xFF4F64F2);
     final String timeFormatted = DateFormat('HH.mm').format(DateTime.now());
     final String dayFormatted = 'Hari Ini';
 
     return BlocConsumer<AiBloc, AiState>(
       listener: (context, state) {
+        if (state is AiRecording) {
+          _recordTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+            _recordDuration.value++;
+          });
+        } else if (state is AiRecordingPaused) {
+          _recordTimer?.cancel();
+          _recordTimer = null;
+        } else {
+          _recordTimer?.cancel();
+          _recordTimer = null;
+          _recordDuration.value = 0;
+        }
+
         if (state is AiSuccess) {
           if (state.action == 'transcribe') {
-            final currentText = _contentController.text;
-            _contentController.text = currentText.isEmpty ? state.text : '$currentText\n${state.text}';
+            final currentText = _quillController.document.toPlainText().trim();
+            if (currentText.isEmpty) {
+              _quillController.document.insert(0, state.text);
+            } else {
+              _quillController.document.insert(_quillController.document.length - 1, '\n${state.text}');
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Transkripsi suara ditambahkan'), behavior: SnackBarBehavior.floating),
             );
@@ -539,19 +656,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             ),
             actions: [
               IconButton(icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)), onPressed: _showMagicAiSheet),
-              ValueListenableBuilder<UndoHistoryValue>(
-                valueListenable: _undoController,
-                builder: (context, value, child) {
+              ListenableBuilder(
+                listenable: _quillController,
+                builder: (context, child) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.undo_rounded, color: value.canUndo ? navyColor : Colors.grey),
-                        onPressed: value.canUndo ? () => _undoController.undo() : null,
+                        icon: Icon(Icons.undo_rounded, color: _quillController.hasUndo ? navyColor : Colors.grey),
+                        onPressed: _quillController.hasUndo ? () => _quillController.undo() : null,
                       ),
                       IconButton(
-                        icon: Icon(Icons.redo_rounded, color: value.canRedo ? navyColor : Colors.grey),
-                        onPressed: value.canRedo ? () => _undoController.redo() : null,
+                        icon: Icon(Icons.redo_rounded, color: _quillController.hasRedo ? navyColor : Colors.grey),
+                        onPressed: _quillController.hasRedo ? () => _quillController.redo() : null,
                       ),
                     ],
                   );
@@ -613,18 +730,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               );
                             },
                           ),
-                          TextField(
-                            controller: _contentController,
-                            undoController: _undoController,
-                            style: TextStyle(fontSize: 18, color: navyColor.withValues(alpha: 0.7), height: 1.6),
-                            decoration: const InputDecoration(hintText: 'Catatan di sini', hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
-                            maxLines: null,
-                            keyboardType: TextInputType.multiline,
-                            contextMenuBuilder: (context, editableTextState) {
-                              return AdaptiveTextSelectionToolbar.editableText(
-                                editableTextState: editableTextState,
-                              );
-                            },
+                          quill.QuillEditor.basic(
+                            configurations: quill.QuillEditorConfigurations(
+                              controller: _quillController,
+                              placeholder: 'Catatan di sini',
+                              padding: EdgeInsets.zero,
+                            ),
+                            focusNode: _editorFocusNode,
                           ),
                           const SizedBox(height: 24),
                           if (_summaryText != null || _translateText != null)
@@ -689,13 +801,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildToolbarIcon(Icons.text_fields_rounded, label: 'Aa'),
-                _buildToolbarIcon(Icons.check_box_outlined),
-                _buildToolbarIcon(Icons.brush_rounded),
-                _buildToolbarIcon(Icons.image_outlined),
-                _buildToolbarIcon(Icons.emoji_emotions_outlined),
+                _buildToolbarIcon(Icons.text_fields_rounded, label: 'Aa', onTap: _showFormatToolbar),
+                _buildToolbarIcon(Icons.check_box_outlined, onTap: _toggleChecklist),
+                _buildToolbarIcon(Icons.brush_rounded, onTap: () => _showNotSupported('Fitur menggambar akan segera hadir!')),
+                _buildToolbarIcon(Icons.image_outlined, onTap: _pickImage),
+                _buildToolbarIcon(Icons.emoji_emotions_outlined, onTap: () => _showNotSupported('Gunakan emoji pada keyboard Anda.')),
                 _buildToolbarIcon(Icons.grid_4x4_rounded, onTap: _showThemePicker),
-                _buildToolbarIcon(Icons.list_rounded),
+                _buildToolbarIcon(Icons.list_rounded, onTap: _toggleBulletList),
               ],
             ),
           ),
@@ -728,6 +840,25 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isRecording || isPaused) ...[
+          ValueListenableBuilder<int>(
+            valueListenable: _recordDuration,
+            builder: (context, duration, child) {
+              final minutes = (duration ~/ 60).toString().padLeft(2, '0');
+              final seconds = (duration % 60).toString().padLeft(2, '0');
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  '$minutes:$seconds',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 12),
           FloatingActionButton.small(
             heroTag: 'note_stop_fab',
             onPressed: () {
