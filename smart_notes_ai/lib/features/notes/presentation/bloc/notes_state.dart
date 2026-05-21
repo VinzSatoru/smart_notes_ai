@@ -11,6 +11,7 @@ class NotesState extends Equatable {
   final String selectedCategoryId;
   final bool isGridView;
   final String errorMessage;
+  final String searchQuery;
 
   const NotesState({
     this.status = NotesStatus.initial,
@@ -19,6 +20,7 @@ class NotesState extends Equatable {
     this.selectedCategoryId = 'all',
     this.isGridView = true,
     this.errorMessage = '',
+    this.searchQuery = '',
   });
 
   NotesState copyWith({
@@ -28,6 +30,7 @@ class NotesState extends Equatable {
     String? selectedCategoryId,
     bool? isGridView,
     String? errorMessage,
+    String? searchQuery,
   }) {
     return NotesState(
       status: status ?? this.status,
@@ -36,6 +39,7 @@ class NotesState extends Equatable {
       selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
       isGridView: isGridView ?? this.isGridView,
       errorMessage: errorMessage ?? this.errorMessage,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 
@@ -47,5 +51,6 @@ class NotesState extends Equatable {
         selectedCategoryId,
         isGridView,
         errorMessage,
+        searchQuery,
       ];
 }

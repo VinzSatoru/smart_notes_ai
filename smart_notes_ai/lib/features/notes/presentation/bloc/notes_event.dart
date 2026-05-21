@@ -27,6 +27,16 @@ class FilterNotesByCategory extends NotesEvent {
   List<Object> get props => [categoryId, userId];
 }
 
+class SearchNotes extends NotesEvent {
+  final String query;
+  final String userId;
+
+  const SearchNotes({required this.query, required this.userId});
+
+  @override
+  List<Object> get props => [query, userId];
+}
+
 class ToggleViewMode extends NotesEvent {}
 
 class PermanentDeleteNoteEvent extends NotesEvent {

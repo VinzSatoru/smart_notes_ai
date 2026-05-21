@@ -42,6 +42,7 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   }) : super(const NotesState()) {
     on<FetchCategoriesAndNotes>(_onFetchCategoriesAndNotes);
     on<FilterNotesByCategory>(_onFilterNotesByCategory);
+    on<SearchNotes>(_onSearchNotes);
     on<ToggleViewMode>(_onToggleViewMode);
     on<PermanentDeleteNoteEvent>(_onPermanentDeleteNote);
     on<MoveToTrashEvent>(_onMoveToTrash);
@@ -122,6 +123,13 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
       (failure) => emit(state.copyWith(status: NotesStatus.failure, errorMessage: failure.message)),
       (notes) => emit(state.copyWith(status: NotesStatus.success, notes: notes)),
     );
+  }
+
+  void _onSearchNotes(
+    SearchNotes event,
+    Emitter<NotesState> emit,
+  ) {
+    emit(state.copyWith(searchQuery: event.query));
   }
 
   void _onToggleViewMode(

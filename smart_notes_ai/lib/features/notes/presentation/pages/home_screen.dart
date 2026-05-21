@@ -327,6 +327,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                onChanged: (value) {
+                  context.read<NotesBloc>().add(SearchNotes(query: value, userId: userId));
+                },
                 decoration: InputDecoration(
                   hintText: 'Cari catatan...',
                   hintStyle: TextStyle(color: navyColor.withValues(alpha: 0.3), fontSize: 14),
@@ -419,7 +422,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNotesList(BuildContext context, NotesState state, String userId) {
     // Sembunyikan catatan yang diarsipkan atau dibuang ke sampah dari layar utama
-    final displayNotes = state.notes.where((note) => !note.isArchived && !note.isTrashed).toList();
+    var displayNotes = state.notes.where((note) => !note.isArchived && !note.isTrashed).toList();
+
+    // Filter berdasarkan pencarian
+    if (state.searchQuery.isNotEmpty) {
+      final query = state.searchQuery.toLowerCase();
+      displayNotes = displayNotes.where((note) {
+        return note.title.toLowerCase().contains(query) || note.contentText.toLowerCase().contains(query);
+      }).toList();
+    }
 
     if (displayNotes.isEmpty) {
       return _buildEmptyState();

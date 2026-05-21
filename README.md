@@ -172,7 +172,7 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Terjemahan Multibahasa Dinamis**: Pengguna dapat menerjemahkan catatan secara gratis dan tanpa batas ke berbagai bahasa (English, Indonesia, Jepang, Korea, Arab, Spanyol, Prancis, Jerman).
 *   **Pemisahan UI Hasil AI**: Hasil Rangkuman dan Terjemahan tidak lagi ditumpuk di editor utama untuk menjaga kebersihan teks. Hasil disajikan dalam *Bottom Sheet* khusus yang interaktif, dan dapat diakses kapan pun melalui tombol "Lihat Rangkuman / Terjemahan" di bawah editor. Data ini tersimpan aman di kolom baru (`ai_summary` dan `ai_translation`) pada database PocketBase.
 
-### Update Pada tgl 21 Mei 2026 oleh Revi Arda
+### Big Update Pada tgl 21 Mei 2026 oleh Revi Arda
 **Fitur Kategori Kustom & Manajemen Semua Catatan:**
 *   **Kategori Kustom Dinamis**: Pengguna kini dapat membuat kategori baru (mis. "Ide Bisnis") langsung dari panel saat membuat atau mengedit catatan.
 *   **Seeding Kategori Cerdas**: Aplikasi secara otomatis membuatkan kategori dasar ("Meeting" & "Materi") bagi pengguna baru jika database masih kosong, mencegah kekosongan tampilan.
@@ -183,3 +183,9 @@ Selamat *ngoding* bersama tim! 🚀
     *   Desain kartu yang diperkaya dengan **Label Kategori** bergaya pil biru dan presisi **Tanggal Pembuatan**.
     *   Tombol *toggle* untuk beralih antara tampilan *List* dan *Grid* (*Masonry*) tanpa menghilangkan fitur manajemen.
     *   Penanganan *layout overflow* tingkat lanjut saat beralih antara mode seleksi dan grid.
+
+**Peningkatan Editor, UI, dan Pencarian:**
+*   **Fitur Tong Sampah (Trash)**: Catatan yang dihapus dari layar utama tidak akan langsung terhapus permanen, melainkan dipindahkan ke menu "Sampah" di *sidebar* (bisa dipulihkan atau dihapus permanen).
+*   **Rich Text Editor (`flutter_quill`)**: Transformasi besar-besaran editor dari sekadar teks polos (*plain text*) menjadi *Rich Text Editor* sepenuhnya. Kini mendukung Format Teks (Tebal, Miring, Garis Bawah, *Header*), *Checklist* interaktif, *Bullet List*, dan fitur menyisipkan Gambar (*Image Picker*) dari galeri langsung ke dalam catatan. Penyimpanan teks otomatis bermigrasi dari *String* ke *Delta JSON* dengan sangat aman tanpa merusak catatan versi lama.
+*   **Voice AI Timer**: Penambahan indikator durasi rekam (*timer* `00:00`) secara langsung di sebelah tombol mikrofon saat Voice AI sedang merekam, agar durasi dapat terpantau.
+*   **Live Search Bar**: Mengaktifkan kotak pencarian di halaman utama sehingga pengguna dapat mencari catatan spesifik berdasarkan "Judul" ataupun "Isi Catatan" secara *real-time* saat mengetik.
