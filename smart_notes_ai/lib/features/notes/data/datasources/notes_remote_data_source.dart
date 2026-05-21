@@ -7,6 +7,8 @@ abstract class NotesRemoteDataSource {
   Future<List<NoteModel>> fetchNotes(String userId, String categoryId);
   Future<void> deleteNote(String noteId);
   Future<void> togglePin(String noteId, bool currentPinStatus);
+  Future<void> toggleFavorite(String noteId, bool currentFavoriteStatus);
+  Future<void> toggleArchive(String noteId, bool currentArchiveStatus);
   Future<void> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<void> updateNote(String noteId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation});
   Future<void> addCategory(String userId, String name);
@@ -59,6 +61,20 @@ class NotesRemoteDataSourceImpl implements NotesRemoteDataSource {
   Future<void> togglePin(String noteId, bool currentPinStatus) async {
     await pbService.pb.collection('notes').update(noteId, body: {
       'is_pinned': !currentPinStatus,
+    });
+  }
+
+  @override
+  Future<void> toggleFavorite(String noteId, bool currentFavoriteStatus) async {
+    await pbService.pb.collection('notes').update(noteId, body: {
+      "is_favorite": !currentFavoriteStatus,
+    });
+  }
+
+  @override
+  Future<void> toggleArchive(String noteId, bool currentArchiveStatus) async {
+    await pbService.pb.collection('notes').update(noteId, body: {
+      "is_archived": !currentArchiveStatus,
     });
   }
 

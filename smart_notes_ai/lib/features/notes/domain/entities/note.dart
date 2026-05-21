@@ -7,6 +7,8 @@ class Note extends Equatable {
   final bool isPinned;
   final String created;
   final String categoryId;
+  final bool isFavorite;
+  final bool isArchived;
   final String? aiSummary;
   final String? aiTranslation;
 
@@ -17,10 +19,23 @@ class Note extends Equatable {
     required this.isPinned,
     required this.created,
     required this.categoryId,
+    this.isFavorite = false,
+    this.isArchived = false,
     this.aiSummary,
     this.aiTranslation,
   });
 
   @override
-  List<Object?> get props => [id, title, contentText, isPinned, created, categoryId, aiSummary, aiTranslation];
+  List<Object?> get props => [
+        id,
+        title,
+        contentText,
+        isPinned,
+        created,
+        categoryId,
+        isFavorite,
+        isArchived,
+        aiSummary,
+        aiTranslation,
+      ];
 }

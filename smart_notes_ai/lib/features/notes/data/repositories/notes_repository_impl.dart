@@ -51,6 +51,26 @@ class NotesRepositoryImpl implements NotesRepository {
   }
 
   @override
+  Future<Either<Failure, void>> toggleFavorite(Note note) async {
+    try {
+      await remoteDataSource.toggleFavorite(note.id, note.isFavorite);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Gagal menandai favorit catatan: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> toggleArchive(Note note) async {
+    try {
+      await remoteDataSource.toggleArchive(note.id, note.isArchived);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Gagal mengarsipkan catatan: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> addNote(String userId, String title, String contentText, String categoryId, {String? aiSummary, String? aiTranslation}) async {
     try {
       await remoteDataSource.addNote(userId, title, contentText, categoryId, aiSummary: aiSummary, aiTranslation: aiTranslation);

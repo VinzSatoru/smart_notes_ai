@@ -100,6 +100,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
+                leading: Icon(note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded, color: const Color(0xFFF59E0B)),
+                title: Text(note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(ToggleFavoriteEvent(note: note));
+                },
+              ),
+              ListTile(
+                leading: Icon(note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined, color: Colors.teal),
+                title: Text(note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(bottomSheetContext);
+                  context.read<NotesBloc>().add(ToggleArchiveEvent(note: note));
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
                 title: const Text('Hapus Catatan', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
                 onTap: () {
@@ -402,14 +418,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNotesList(BuildContext context, NotesState state, String userId) {
+    // Sembunyikan catatan yang diarsipkan dari layar utama
+    final displayNotes = state.notes.where((note) => !note.isArchived).toList();
+
+    if (displayNotes.isEmpty) {
+      return _buildEmptyState();
+    }
+
     return MasonryGridView.count(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
       crossAxisCount: state.isGridView ? 2 : 1,
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
-      itemCount: state.notes.length,
+      itemCount: displayNotes.length,
       itemBuilder: (context, index) {
-        final note = state.notes[index];
+        final note = displayNotes[index];
         return NoteCard(
           note: note,
           onTap: () {
@@ -512,9 +535,23 @@ class _HomeScreenState extends State<HomeScreen> {
                   ]),
                   const SizedBox(height: 16),
                   _buildDrawerGroup([
-                    _buildDrawerItem(Icons.star_outline_rounded, 'Favorit'),
+                    _buildDrawerItem(Icons.star_outline_rounded, 'Favorit', onTap: () {
+                      Navigator.pop(context);
+                      context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId, filterFavorite: true)),
+                      );
+                    }),
                     _buildDrawerItem(Icons.tag_rounded, 'Tag'),
-                    _buildDrawerItem(Icons.archive_outlined, 'Arsip'),
+                    _buildDrawerItem(Icons.archive_outlined, 'Arsip', onTap: () {
+                      Navigator.pop(context);
+                      context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AllNotesManagementScreen(userId: userId, filterArchive: true)),
+                      );
+                    }),
                     _buildDrawerItem(Icons.delete_outline_rounded, 'Sampah'),
                   ]),
                   const SizedBox(height: 16),

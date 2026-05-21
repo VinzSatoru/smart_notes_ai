@@ -97,8 +97,16 @@ class _NoteCardState extends State<NoteCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isPinned)
-                    Icon(Icons.push_pin_rounded, size: 14, color: primaryColor),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (note.isFavorite)
+                        const Icon(Icons.star_rounded, size: 16, color: Color(0xFFF59E0B)),
+                      if (note.isFavorite && isPinned) const SizedBox(width: 4),
+                      if (isPinned)
+                        Icon(Icons.push_pin_rounded, size: 14, color: primaryColor),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 12),

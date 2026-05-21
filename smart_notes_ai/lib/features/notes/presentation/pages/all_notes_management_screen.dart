@@ -11,7 +11,15 @@ import 'note_editor_screen.dart';
 
 class AllNotesManagementScreen extends StatefulWidget {
   final String userId;
-  const AllNotesManagementScreen({super.key, required this.userId});
+  final bool filterFavorite;
+  final bool filterArchive;
+
+  const AllNotesManagementScreen({
+    super.key,
+    required this.userId,
+    this.filterFavorite = false,
+    this.filterArchive = false,
+  });
 
   @override
   State<AllNotesManagementScreen> createState() => _AllNotesManagementScreenState();
@@ -103,7 +111,11 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
           },
         ),
         title: Text(
-          _isSelectionMode ? '${_selectedNoteIds.length} Terpilih' : 'Manajemen Catatan',
+          _isSelectionMode 
+            ? '${_selectedNoteIds.length} Dipilih' 
+            : (widget.filterArchive 
+                ? 'Catatan Arsip' 
+                : (widget.filterFavorite ? 'Catatan Favorit' : 'Semua Catatan')),
           style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
         actions: [
@@ -132,11 +144,34 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state.notes.isEmpty) {
+          var displayNotes = state.notes;
+          if (widget.filterArchive) {
+            displayNotes = displayNotes.where((note) => note.isArchived).toList();
+          } else {
+            // Sembunyikan arsip jika tidak dalam mode arsip
+            displayNotes = displayNotes.where((note) => !note.isArchived).toList();
+          }
+
+          if (widget.filterFavorite) {
+            displayNotes = displayNotes.where((note) => note.isFavorite).toList();
+          }
+
+          if (displayNotes.isEmpty) {
             return Center(
-              child: Text(
-                'Belum ada catatan',
-                style: TextStyle(color: navyColor.withValues(alpha: 0.5), fontSize: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.filterArchive ? Icons.archive_outlined : (widget.filterFavorite ? Icons.star_outline : Icons.note_alt_outlined), 
+                    size: 64, 
+                    color: Colors.grey.shade300
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    widget.filterArchive ? 'Belum ada catatan yang diarsipkan' : (widget.filterFavorite ? 'Belum ada catatan favorit' : 'Belum ada catatan'), 
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 16)
+                  ),
+                ],
               ),
             );
           }
@@ -146,10 +181,10 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               crossAxisCount: 2,
               mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              itemCount: state.notes.length,
+              crossAxisSpacing: 16,
+              itemCount: displayNotes.length,
               itemBuilder: (context, index) {
-                final note = state.notes[index];
+                final note = displayNotes[index];
                 return _buildNoteCard(note, state.categories, context);
               },
             );

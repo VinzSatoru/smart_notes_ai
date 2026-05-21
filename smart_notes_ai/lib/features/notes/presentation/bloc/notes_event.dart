@@ -59,6 +59,24 @@ class TogglePinEvent extends NotesEvent {
   List<Object> get props => [note, userId];
 }
 
+class ToggleFavoriteEvent extends NotesEvent {
+  final Note note;
+
+  const ToggleFavoriteEvent({required this.note});
+
+  @override
+  List<Object> get props => [note];
+}
+
+class ToggleArchiveEvent extends NotesEvent {
+  final Note note;
+
+  const ToggleArchiveEvent({required this.note});
+
+  @override
+  List<Object> get props => [note];
+}
+
 class AddCategoryEvent extends NotesEvent {
   final String userId;
   final String name;

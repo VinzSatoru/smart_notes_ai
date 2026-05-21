@@ -1,0 +1,30 @@
+/// <reference path="../pb_data/types.d.ts" />
+migrate((app) => {
+  const collection = app.findCollectionByNameOrId("notes123456789")
+
+  // add field
+  collection.fields.addAt(9, new Field({
+    "autogeneratePattern": "",
+    "help": "",
+    "hidden": false,
+    "id": "bool_is_favorite",
+    "max": 0,
+    "min": 0,
+    "name": "is_favorite",
+    "pattern": "",
+    "presentable": false,
+    "primaryKey": false,
+    "required": false,
+    "system": false,
+    "type": "bool"
+  }))
+
+  return app.save(collection)
+}, (app) => {
+  const collection = app.findCollectionByNameOrId("notes123456789")
+
+  // remove field
+  collection.fields.removeById("bool_is_favorite")
+
+  return app.save(collection)
+})
