@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top Bar (Hamburger + Search + Calendar)
-                _buildHeaderBar(),
+                _buildHeaderBar(userId),
                 
                 // Category Pills + Grid Toggle
                 _buildCategoryRow(context, state, userId),
@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHeaderBar() {
+  Widget _buildHeaderBar(String userId) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
       child: Row(
@@ -325,9 +325,11 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: Icon(Icons.calendar_month_rounded, color: navyColor, size: 26),
             onPressed: () {
+              // Muat semua catatan agar filter lokal kalender berfungsi maksimal
+              context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                MaterialPageRoute(builder: (context) => CalendarScreen(userId: userId)),
               );
             },
           ),
@@ -503,7 +505,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     }),
                     _buildDrawerItem(Icons.calendar_month_outlined, 'Kalender', onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const CalendarScreen()));
+                      // Muat semua catatan agar filter lokal kalender berfungsi maksimal
+                      context.read<NotesBloc>().add(FilterNotesByCategory(categoryId: 'all', userId: userId));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => CalendarScreen(userId: userId)));
                     }),
                   ]),
                   const SizedBox(height: 16),

@@ -50,6 +50,7 @@ dependencies:
   avatar_glow: ^3.0.1
   animate_do: ^5.1.0
   flutter_dotenv: ^5.1.0
+  table_calendar: ^3.2.0
 
 dev_dependencies:
   flutter_test:
