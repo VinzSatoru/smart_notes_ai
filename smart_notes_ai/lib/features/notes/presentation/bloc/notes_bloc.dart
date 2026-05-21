@@ -13,6 +13,7 @@ import '../../domain/usecases/restore_note_usecase.dart';
 import 'notes_event.dart';
 import 'notes_state.dart';
 import '../../domain/entities/note.dart';
+import '../../domain/entities/category.dart';
 
 class NotesBloc extends Bloc<NotesEvent, NotesState> {
   final FetchNotesUseCase fetchNotesUseCase;
@@ -82,11 +83,22 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
           return;
         }
 
+        // Deduplikasi kategori berdasarkan nama untuk mengatasi bug double
+        final uniqueCategories = <Category>[];
+        final seenNames = <String>{};
+        for (var cat in categories) {
+          final normalized = cat.name.trim().toLowerCase();
+          if (!seenNames.contains(normalized)) {
+            uniqueCategories.add(cat);
+            seenNames.add(normalized);
+          }
+        }
+
         notesResult.fold(
           (failure) => emit(state.copyWith(status: NotesStatus.failure, errorMessage: failure.message)),
           (notes) => emit(state.copyWith(
             status: NotesStatus.success,
-            categories: categories,
+            categories: uniqueCategories,
             notes: notes,
           )),
         );

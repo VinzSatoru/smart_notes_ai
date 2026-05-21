@@ -97,7 +97,7 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFD),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -174,16 +174,30 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    widget.filterTrash ? Icons.delete_outline_rounded : (widget.filterArchive ? Icons.archive_outlined : (widget.filterFavorite ? Icons.star_outline : Icons.note_alt_outlined)), 
-                    size: 64, 
-                    color: Colors.grey.shade300
-                  ),
-                  const SizedBox(height: 16),
+                  if (!widget.filterTrash && !widget.filterArchive && !widget.filterFavorite)
+                    Image.asset(
+                      'assets/images/empty_notes.png',
+                      width: 180,
+                      errorBuilder: (context, error, stackTrace) => Icon(Icons.note_alt_outlined, size: 64, color: Colors.grey.shade300),
+                    )
+                  else
+                    Icon(
+                      widget.filterTrash ? Icons.delete_outline_rounded : (widget.filterArchive ? Icons.archive_outlined : Icons.star_outline), 
+                      size: 64, 
+                      color: Colors.grey.shade300
+                    ),
+                  const SizedBox(height: 24),
                   Text(
                     widget.filterTrash ? 'Sampah kosong' : (widget.filterArchive ? 'Belum ada catatan yang diarsipkan' : (widget.filterFavorite ? 'Belum ada catatan favorit' : 'Belum ada catatan')), 
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 16)
+                    style: TextStyle(color: navyColor, fontSize: 16, fontWeight: FontWeight.bold)
                   ),
+                  if (!widget.filterTrash && !widget.filterArchive && !widget.filterFavorite) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ayo mulai tulis ide cemerlangmu!',
+                      style: TextStyle(color: navyColor.withValues(alpha: 0.5), fontSize: 14),
+                    ),
+                  ],
                 ],
               ),
             );

@@ -13,8 +13,10 @@ import '../widgets/note_card.dart';
 import 'note_editor_screen.dart';
 import 'calendar_screen.dart';
 import 'all_notes_management_screen.dart';
+import 'settings_screen.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/category.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -255,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC), // Slate 50
       drawer: _buildDrawer(userName, userId),
       body: SafeArea(
         child: BlocBuilder<NotesBloc, NotesState>(
@@ -282,25 +284,35 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FadeInUp(
         duration: const Duration(milliseconds: 800),
-        child: GestureDetector(
-          onTap: () => _showAddNoteOptions(context, userId, context.read<NotesBloc>().state.categories),
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: primaryColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+        child: AvatarGlow(
+          glowColor: primaryColor,
+          duration: const Duration(milliseconds: 2000),
+          repeat: true,
+          child: GestureDetector(
+            onTap: () => _showAddNoteOptions(context, userId, context.read<NotesBloc>().state.categories),
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF4F64F2), Color(0xFF3B4CEB)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              ],
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.add_rounded, color: Colors.white, size: 36),
             ),
-            child: const Icon(Icons.add_rounded, color: Colors.white, size: 36),
           ),
         ),
       ),
@@ -321,9 +333,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: navyColor.withValues(alpha: 0.05)),
+                border: Border.all(color: navyColor.withValues(alpha: 0.08)),
               ),
               child: TextField(
                 controller: _searchController,
@@ -402,18 +414,22 @@ class _HomeScreenState extends State<HomeScreen> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF0EA5E9) : Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? primaryColor : navyColor.withValues(alpha: 0.08)),
+          boxShadow: isSelected 
+              ? [BoxShadow(color: primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))]
+              : [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 4, offset: const Offset(0, 2))],
         ),
         alignment: Alignment.center,
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected ? Colors.white : navyColor.withValues(alpha: 0.4),
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-            fontSize: 13,
+            color: isSelected ? Colors.white : navyColor.withValues(alpha: 0.6),
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 12,
           ),
         ),
       ),
@@ -465,11 +481,22 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.note_alt_rounded, size: 60, color: Colors.grey.shade200),
-          const SizedBox(height: 16),
+          Image.asset(
+            'assets/images/empty_notes.png',
+            width: 200,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(Icons.note_alt_rounded, size: 60, color: Colors.grey.shade200);
+            },
+          ),
+          const SizedBox(height: 24),
           Text(
-            'Mulai tulis sesuatu...',
-            style: TextStyle(color: navyColor.withValues(alpha: 0.2), fontWeight: FontWeight.bold),
+            'Belum ada catatan',
+            style: TextStyle(color: navyColor, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ayo mulai tulis ide cemerlangmu!',
+            style: TextStyle(color: navyColor.withValues(alpha: 0.5), fontSize: 14),
           ),
         ],
       ),
@@ -502,8 +529,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [primaryColor, primaryColor.withValues(alpha: 0.8)]),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4F64F2), Color(0xFF3B4CEB)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(color: primaryColor.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -573,7 +607,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ]),
                   const SizedBox(height: 16),
                   _buildDrawerGroup([
-                    _buildDrawerItem(Icons.settings_outlined, 'Pengaturan'),
+                    _buildDrawerItem(Icons.settings_outlined, 'Pengaturan', onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
+                    }),
                     _buildDrawerItem(Icons.logout_rounded, 'Keluar', color: Colors.red, onTap: () {
                       Navigator.pop(context);
                       _showLogoutDialog();

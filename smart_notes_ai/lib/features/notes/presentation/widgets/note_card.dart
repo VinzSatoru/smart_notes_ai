@@ -55,16 +55,6 @@ class _NoteCardState extends State<NoteCard> {
       }
     }
 
-    // Professional pastel palette
-    final List<Map<String, Color>> palette = [
-      {'bg': const Color(0xFFF8F9FF), 'accent': const Color(0xFF4F64F2)}, // Blue
-      {'bg': const Color(0xFFFDF8FF), 'accent': const Color(0xFFA855F7)}, // Purple
-      {'bg': const Color(0xFFF8FFF9), 'accent': const Color(0xFF22C55E)}, // Green
-      {'bg': const Color(0xFFFFFBF0), 'accent': const Color(0xFFF59E0B)}, // Amber
-    ];
-    
-    final colorScheme = palette[note.id.length % palette.length];
-
     return GestureDetector(
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
@@ -151,13 +141,13 @@ class _NoteCardState extends State<NoteCard> {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: colorScheme['accent']!.withValues(alpha: 0.05),
+                      color: primaryColor.withValues(alpha: 0.05),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.arrow_forward_rounded,
                       size: 14,
-                      color: colorScheme['accent'],
+                      color: primaryColor,
                     ),
                   ),
                 ],
