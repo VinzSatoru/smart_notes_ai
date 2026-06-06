@@ -189,3 +189,10 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Rich Text Editor (`flutter_quill`)**: Transformasi besar-besaran editor dari sekadar teks polos (*plain text*) menjadi *Rich Text Editor* sepenuhnya. Kini mendukung Format Teks (Tebal, Miring, Garis Bawah, *Header*), *Checklist* interaktif, *Bullet List*, dan fitur menyisipkan Gambar (*Image Picker*) dari galeri langsung ke dalam catatan. Penyimpanan teks otomatis bermigrasi dari *String* ke *Delta JSON* dengan sangat aman tanpa merusak catatan versi lama.
 *   **Voice AI Timer**: Penambahan indikator durasi rekam (*timer* `00:00`) secara langsung di sebelah tombol mikrofon saat Voice AI sedang merekam, agar durasi dapat terpantau.
 *   **Live Search Bar**: Mengaktifkan kotak pencarian di halaman utama sehingga pengguna dapat mencari catatan spesifik berdasarkan "Judul" ataupun "Isi Catatan" secara *real-time* saat mengetik.
+
+### Update pada tanggal 6 juni oleh Vinzsatoru
+**Integrasi DOKU Payment & Penyempurnaan AI:**
+*   **DOKU Payment Gateway v2**: Mengimplementasikan sistem langganan Premium/Pro menggunakan Virtual Account DOKU secara langsung (*Server-to-Server*) tanpa WebView. 
+*   **Auto-Polling & UI Kustom**: Menampilkan layar pembayaran dengan antarmuka elegan, deteksi kelulusan pembayaran otomatis (setiap 5 detik), dan mengubah status *tier* pengguna menjadi `pro` secara instan (*real-time state update*).
+*   **Perbaikan Cache Audio AI**: Memperbaiki masalah `PathNotFoundException` saat merekam lebih dari 1 menit dengan memindahkan penyimpanan *cache* rekaman ke `ApplicationDocumentsDirectory`, sehingga Android OS tidak menghapus file rekaman saat proses transkripsi berlangsung.
+*   **Bypass Anti-Bot Groq**: Menambahkan *User-Agent* spesifik untuk mencegah *error 403 Access Denied* dari Cloudflare Groq.
