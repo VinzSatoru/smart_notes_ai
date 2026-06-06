@@ -31,3 +31,12 @@ class AuthError extends AuthState {
   @override
   List<Object> get props => [message];
 }
+
+class OtpSent extends AuthState {
+  final String otp;
+  
+  const OtpSent({required this.otp});
+
+  @override
+  List<Object> get props => [otp];
+}

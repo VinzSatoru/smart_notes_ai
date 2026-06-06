@@ -55,6 +55,7 @@ dependencies:
   flutter_quill: 10.8.0
   image_picker: ^0.8.9
   crypto: ^3.0.7
+  mailer: ^7.1.0
 
 dev_dependencies:
   flutter_test:

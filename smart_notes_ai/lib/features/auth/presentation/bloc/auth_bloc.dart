@@ -7,11 +7,14 @@ import '../../domain/usecases/get_current_user_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+import '../../data/services/email_service.dart';
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final EmailService emailService = EmailService();
 
   AuthBloc({
     required this.loginUseCase,
@@ -23,6 +26,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterRequested>(_onRegisterRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<AuthRefreshUserRequested>(_onRefreshUser);
+    on<SendOtpRequested>(_onSendOtpRequested);
+    on<VerifyOtpRequested>(_onVerifyOtpRequested);
+  }
+
+  Future<void> _onSendOtpRequested(
+    SendOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final otp = await emailService.sendOtp(event.email, event.name);
+      emit(OtpSent(otp: otp));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onVerifyOtpRequested(
+    VerifyOtpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    if (event.inputOtp == event.expectedOtp) {
+      // OTP benar, lanjutkan proses registrasi ke server PocketBase
+      final result = await registerUseCase(
+        RegisterParams(
+          name: event.name,
+          email: event.email,
+          password: event.password,
+          passwordConfirm: event.passwordConfirm,
+        ),
+      );
+
+      result.fold(
+        (failure) => emit(AuthError(message: failure.message)),
+        (user) => emit(Authenticated(user: user)),
+      );
+    } else {
+      emit(const AuthError(message: 'Kode OTP salah. Silakan coba lagi.'));
+    }
   }
 
   Future<void> _onLoginRequested(

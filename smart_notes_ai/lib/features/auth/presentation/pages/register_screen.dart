@@ -5,6 +5,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../../notes/presentation/pages/home_screen.dart';
+import 'otp_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -39,24 +40,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _passwordController.text.isEmpty ||
         _confirmController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua kolom harus diisi')),
+        const SnackBar(content: Text('Semua field harus diisi')),
       );
       return;
     }
 
     if (_passwordController.text != _confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Konfirmasi password tidak cocok')),
+        const SnackBar(content: Text('Password tidak cocok')),
       );
       return;
     }
 
     context.read<AuthBloc>().add(
-          RegisterRequested(
+          SendOtpRequested(
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-            passwordConfirm: _confirmController.text.trim(),
           ),
         );
   }
@@ -82,10 +81,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           SafeArea(
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
-                if (state is Authenticated) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    (route) => false,
+                if (state is OtpSent) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OtpVerificationScreen(
+                        name: _nameController.text.trim(),
+                        email: _emailController.text.trim(),
+                        password: _passwordController.text.trim(),
+                        passwordConfirm: _confirmController.text.trim(),
+                        expectedOtp: state.otp,
+                      ),
+                    ),
                   );
                 } else if (state is AuthError) {
                   ScaffoldMessenger.of(context).showSnackBar(
