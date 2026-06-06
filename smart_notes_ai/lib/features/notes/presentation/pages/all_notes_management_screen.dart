@@ -295,25 +295,16 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                         ),
                     ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_isSelectionMode) ...[
-                          Checkbox(
-                            value: isSelected,
-                            onChanged: (_) => _toggleSelection(note.id),
-                            activeColor: primaryColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(right: _isSelectionMode ? 24.0 : 0),
+                              child: Text(
                                 note.title.isNotEmpty ? note.title : 'Tanpa Judul',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -323,45 +314,57 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                dateStr,
-                                style: TextStyle(
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: navyColor.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              displayContent.isNotEmpty ? displayContent : 'Catatan kosong...',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: navyColor.withValues(alpha: 0.6),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0EA5E9).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                categoryName,
+                                style: const TextStyle(
                                   fontSize: 11,
-                                  color: navyColor.withValues(alpha: 0.4),
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF0EA5E9),
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                               Text(
-                                displayContent.isNotEmpty ? displayContent : 'Catatan kosong...',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: navyColor.withValues(alpha: 0.6),
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF0EA5E9).withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  categoryName,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF0EA5E9),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_isSelectionMode)
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: IgnorePointer(
+                            child: Icon(
+                              isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                              color: isSelected ? primaryColor : Colors.grey.shade400,
+                              size: 22,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
     );
@@ -379,41 +382,129 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 8),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Container(
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+              const SizedBox(height: 16),
               ListTile(
-                leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin, color: primaryColor),
-                title: Text(note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                    color: const Color(0xFF475569),
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan',
+                  style: const TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   context.read<NotesBloc>().add(TogglePinEvent(note: note, userId: widget.userId));
                 },
               ),
               ListTile(
-                leading: Icon(note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded, color: const Color(0xFFF59E0B)),
-                title: Text(note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
+                    color: const Color(0xFF475569),
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit',
+                  style: const TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   context.read<NotesBloc>().add(ToggleFavoriteEvent(note: note));
                 },
               ),
               ListTile(
-                leading: Icon(note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined, color: Colors.teal),
-                title: Text(note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan', style: TextStyle(color: navyColor, fontWeight: FontWeight.w600)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+                    color: const Color(0xFF475569),
+                    size: 22,
+                  ),
+                ),
+                title: Text(
+                  note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan',
+                  style: const TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   context.read<NotesBloc>().add(ToggleArchiveEvent(note: note));
                 },
               ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+              ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                title: const Text('Buang ke Sampah', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                leading: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFEF4444),
+                    size: 22,
+                  ),
+                ),
+                title: const Text(
+                  'Buang ke Sampah',
+                  style: TextStyle(
+                    color: Color(0xFFEF4444),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(bottomSheetContext);
                   context.read<NotesBloc>().add(MoveToTrashEvent(note: note));
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
           ),
         );

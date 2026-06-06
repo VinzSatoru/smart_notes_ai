@@ -65,6 +65,7 @@ class AiRemoteDataSourceImpl implements AiRemoteDataSource {
     try {
       final request = http.MultipartRequest('POST', Uri.parse(ApiConstants.groqTranscriptionsUrl));
       request.headers['Authorization'] = 'Bearer ${ApiConstants.groqApiKey}';
+      request.headers['User-Agent'] = 'SmartNotesAI/1.0.0 (Android)';
       
       request.fields['model'] = ApiConstants.groqWhisperModel;
       request.fields['response_format'] = 'json';
@@ -94,6 +95,7 @@ class AiRemoteDataSourceImpl implements AiRemoteDataSource {
         headers: {
           'Authorization': 'Bearer ${ApiConstants.groqApiKey}',
           'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
         },
         body: jsonEncode({
           'model': ApiConstants.groqTextModel,
@@ -111,9 +113,11 @@ class AiRemoteDataSourceImpl implements AiRemoteDataSource {
         final content = json['choices'][0]['message']['content'];
         return content.toString().trim();
       } else {
+        print('Groq API Error: ${response.statusCode} - ${response.body}');
         throw Exception('Groq API Error: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print('Groq API Exception: $e');
       throw Exception('Gagal memproses teks: $e');
     }
   }

@@ -250,8 +250,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   _buildSocialButton(Icons.facebook, const Color(0xFF1877F2)),
                                   const SizedBox(width: 16),
                                   _buildSocialButton('G', Colors.red, isGoogle: true),
-                                  const SizedBox(width: 16),
-                                  _buildSocialButton(Icons.apple, Colors.black),
                                 ],
                               ),
                               const SizedBox(height: 40),

@@ -32,7 +32,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final record = await remoteDataSource.login(email, password);
       return Right(_mapRecordToUser(record));
     } on ClientException catch (e) {
-      return Left(ServerFailure(e.response['message'] ?? 'Gagal mendaftar. Pastikan email belum digunakan.'));
+      final msg = e.response['message'];
+      if (msg != null && msg.isNotEmpty) {
+        return Left(ServerFailure(msg));
+      }
+      return Left(ServerFailure('Tidak dapat terhubung ke server. Pastikan server PocketBase berjalan.'));
     } catch (e) {
       return const Left(ServerFailure('Terjadi kesalahan tidak terduga.'));
     }

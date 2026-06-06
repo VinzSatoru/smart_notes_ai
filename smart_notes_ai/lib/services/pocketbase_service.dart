@@ -1,8 +1,9 @@
 import 'package:pocketbase/pocketbase.dart';
 
 class PocketBaseService {
-  // Menggunakan IP lokal WiFi PC agar bisa diakses dari HP fisik di jaringan yang sama
-  static const String baseUrl = 'http://192.168.0.105:8090'; 
+  // Gunakan 10.0.2.2 untuk Emulator Android Studio. 
+  // Jika menggunakan HP Fisik, ganti kembali ke 127.0.0.1 dan jalankan `adb reverse tcp:8090 tcp:8090`
+  static const String baseUrl = 'http://10.0.2.2:8090'; 
   
   late final PocketBase pb;
 

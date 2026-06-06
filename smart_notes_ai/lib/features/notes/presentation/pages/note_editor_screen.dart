@@ -15,6 +15,7 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'dart:convert';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
+import 'dart:ui';
 import 'package:smart_notes_ai/features/payment/presentation/pages/payment_method_screen.dart';
 
 const Color navyColor = Color(0xFF1E293B);
@@ -348,25 +349,36 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   Container(
-                    width: 40,
-                    height: 4,
+                    width: 48,
+                    height: 5,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(2.5),
                     ),
                   ),
+                  const SizedBox(height: 16),
                   ListTile(
-                    leading: Icon(
-                      note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
-                      color: const Color(0xFF4F64F2),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        note.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+                        color: const Color(0xFF475569),
+                        size: 22,
+                      ),
                     ),
                     title: Text(
                       note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan',
                       style: const TextStyle(
                         color: Color(0xFF1E293B),
                         fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                     onTap: () {
@@ -376,11 +388,20 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(
-                      note.isFavorite
-                          ? Icons.star_rounded
-                          : Icons.star_border_rounded,
-                      color: const Color(0xFFF59E0B),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        note.isFavorite
+                            ? Icons.star_rounded
+                            : Icons.star_border_rounded,
+                        color: const Color(0xFF475569),
+                        size: 22,
+                      ),
                     ),
                     title: Text(
                       note.isFavorite
@@ -389,6 +410,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       style: const TextStyle(
                         color: Color(0xFF1E293B),
                         fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                     onTap: () {
@@ -398,17 +420,27 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(
-                      note.isArchived
-                          ? Icons.unarchive_outlined
-                          : Icons.archive_outlined,
-                      color: Colors.teal,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        note.isArchived
+                            ? Icons.unarchive_outlined
+                            : Icons.archive_outlined,
+                        color: const Color(0xFF475569),
+                        size: 22,
+                      ),
                     ),
                     title: Text(
                       note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan',
                       style: const TextStyle(
                         color: Color(0xFF1E293B),
                         fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                     onTap: () {
@@ -417,16 +449,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       );
                     },
                   ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+                  ),
                   ListTile(
-                    leading: const Icon(
-                      Icons.delete_outline,
-                      color: Colors.redAccent,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: Color(0xFFEF4444),
+                        size: 22,
+                      ),
                     ),
                     title: const Text(
                       'Buang ke Sampah',
                       style: TextStyle(
-                        color: Colors.redAccent,
+                        color: Color(0xFFEF4444),
                         fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                     onTap: () {
@@ -437,7 +483,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                 ],
               ),
             );
@@ -602,94 +648,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
-  void _showMagicAiSheet() {
-    if (_quillController.document.toPlainText().trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Catatan masih kosong.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    '✨ Magic AI',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFE5DEFF),
-                    child: Icon(
-                      Icons.summarize_rounded,
-                      color: Color(0xFF4F64F2),
-                    ),
-                  ),
-                  title: const Text(
-                    'Rangkum Catatan',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: const Text(
-                    'Maks. 5x sehari',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.read<AiBloc>().add(
-                      ProcessTextRequested(
-                        text: _quillController.document.toPlainText(),
-                        action: 'summary',
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFFD7FBE1),
-                    child: Icon(Icons.language_rounded, color: Colors.green),
-                  ),
-                  title: const Text(
-                    'Terjemahkan ke...',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: const Text(
-                    'Gratis tanpa batas',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context); // Tutup sheet pertama
-                    _showLanguagePicker(); // Buka opsi bahasa
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   void _showLanguagePicker() {
     final List<Map<String, String>> languages = [
@@ -871,6 +829,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             setState(() {
               _summaryText = state.text;
             });
+            _showAiResultSheet('Rangkuman AI', state.text);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Rangkuman berhasil dibuat ✨'),
@@ -878,10 +837,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               ),
             );
           } else if (state.action.startsWith('translate:')) {
+            final targetLang = state.action.split(':')[1];
             setState(() {
-              _translateLang = state.action.split(':')[1];
+              _translateLang = targetLang;
               _translateText = state.text;
             });
+            _showAiResultSheet('Terjemahan ($targetLang)', state.text);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Terjemahan berhasil dibuat ✨'),
@@ -914,66 +875,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       builder: (context, aiState) {
         return Scaffold(
           backgroundColor: _currentBgColor,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.check_rounded, color: navyColor, size: 28),
-              onPressed: _saveNote,
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)),
-                onPressed: _showMagicAiSheet,
-              ),
-              ListenableBuilder(
-                listenable: _quillController,
-                builder: (context, child) {
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.undo_rounded,
-                          color: _quillController.hasUndo
-                              ? navyColor
-                              : Colors.grey,
-                        ),
-                        onPressed: _quillController.hasUndo
-                            ? () => _quillController.undo()
-                            : null,
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.redo_rounded,
-                          color: _quillController.hasRedo
-                              ? navyColor
-                              : Colors.grey,
-                        ),
-                        onPressed: _quillController.hasRedo
-                            ? () => _quillController.redo()
-                            : null,
-                      ),
-                    ],
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.ios_share_rounded,
-                  color: navyColor,
-                  size: 22,
-                ),
-                onPressed: _shareNote,
-              ),
-              IconButton(
-                icon: const Icon(Icons.more_vert_rounded, color: navyColor),
-                onPressed: _showMoreOptions,
-              ),
-            ],
-          ),
           body: Stack(
             children: [
+              // Background Pattern
               if (_currentPattern != PaperPattern.none)
                 Positioned.fill(
                   child: CustomPaint(
@@ -983,222 +887,366 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     ),
                   ),
                 ),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '$dayFormatted, $timeFormatted',
-                          style: TextStyle(
-                            color: navyColor.withValues(alpha: 0.4),
-                            fontWeight: FontWeight.w500,
+              // Main Scrollable Content
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    // Custom Premium Header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: navyColor),
+                            onPressed: _saveNote,
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () => _showCategoryPicker(),
-                          child: Row(
+                          Row(
                             children: [
-                              Icon(
-                                Icons.book_outlined,
-                                size: 16,
-                                color: navyColor.withValues(alpha: 0.6),
+                              ListenableBuilder(
+                                listenable: _quillController,
+                                builder: (context, child) {
+                                  return Row(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.undo_rounded, size: 22, color: _quillController.hasUndo ? navyColor : Colors.grey),
+                                        onPressed: _quillController.hasUndo ? () => _quillController.undo() : null,
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.redo_rounded, size: 22, color: _quillController.hasRedo ? navyColor : Colors.grey),
+                                        onPressed: _quillController.hasRedo ? () => _quillController.redo() : null,
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                _selectedCategoryId == null ||
-                                        _selectedCategoryId == 'all'
-                                    ? 'Tanpa Kategori'
-                                    : widget.categories
-                                          .firstWhere(
-                                            (c) => c.id == _selectedCategoryId,
-                                          )
-                                          .name,
-                                style: TextStyle(
-                                  color: navyColor.withValues(alpha: 0.6),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                size: 20,
-                                color: navyColor.withValues(alpha: 0.4),
+                              IconButton(
+                                icon: const Icon(Icons.more_vert_rounded, color: navyColor),
+                                onPressed: _showMoreOptions,
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextField(
-                            controller: _titleController,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: navyColor,
+                    // Editor Content
+                    // Editor Content
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                            sliver: SliverList(
+                              delegate: SliverChildListDelegate([
+                                // Metadata (Category & Date)
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => _showCategoryPicker(),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: primaryColor.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.folder_outlined, size: 14, color: primaryColor),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              _selectedCategoryId == null || _selectedCategoryId == 'all'
+                                                  ? 'Tanpa Kategori'
+                                                  : widget.categories.firstWhere((c) => c.id == _selectedCategoryId, orElse: () => widget.categories.first).name,
+                                              style: const TextStyle(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '$dayFormatted, $timeFormatted',
+                                      style: TextStyle(
+                                        color: navyColor.withValues(alpha: 0.4),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                // Title
+                                TextField(
+                                  controller: _titleController,
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                    color: navyColor,
+                                    height: 1.2,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    hintText: 'Judul Catatan',
+                                    hintStyle: TextStyle(color: Colors.black26),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                  ),
+                                  maxLines: null,
+                                  contextMenuBuilder: (context, editableTextState) {
+                                    return AdaptiveTextSelectionToolbar.editableText(
+                                      editableTextState: editableTextState,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                // Quill Editor
+                                quill.QuillEditor.basic(
+                                  configurations: quill.QuillEditorConfigurations(
+                                    controller: _quillController,
+                                    placeholder: 'Mulai menulis...',
+                                    padding: EdgeInsets.zero,
+                                    scrollable: false,
+                                    expands: false,
+                                    autoFocus: false,
+                                  ),
+                                  focusNode: _editorFocusNode,
+                                ),
+                                const SizedBox(height: 32),
+                              ]),
                             ),
-                            decoration: const InputDecoration(
-                              hintText: 'Judul',
-                              hintStyle: TextStyle(color: Colors.black26),
-                              border: InputBorder.none,
-                            ),
-                            maxLines: null,
-                            contextMenuBuilder: (context, editableTextState) {
-                              return AdaptiveTextSelectionToolbar.editableText(
-                                editableTextState: editableTextState,
-                              );
-                            },
                           ),
-                          quill.QuillEditor.basic(
-                            configurations: quill.QuillEditorConfigurations(
-                              controller: _quillController,
-                              placeholder: 'Catatan di sini',
-                              padding: EdgeInsets.zero,
-                            ),
-                            focusNode: _editorFocusNode,
-                          ),
-                          const SizedBox(height: 24),
-                          if (_summaryText != null || _translateText != null)
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 10,
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            fillOverscroll: true,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // AI Results / Action Cards
+                                  ListenableBuilder(
+                                    listenable: _quillController,
+                                    builder: (context, child) {
+                                      final isEmpty = _quillController.document.toPlainText().trim().isEmpty;
+                                      final hasSummary = _summaryText != null && _summaryText!.isNotEmpty;
+                                      final hasTranslate = _translateText != null && _translateText!.isNotEmpty;
+                                      return Opacity(
+                                        opacity: isEmpty ? 0.4 : 1.0,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFFF3E8FF), Color(0xFFE0E7FF)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(20),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: const Color(0xFF4F64F2).withValues(alpha: 0.15),
+                                                    blurRadius: 15,
+                                                    offset: const Offset(0, 5),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                  onTap: () {
+                                                    if (hasSummary) {
+                                                      _showAiResultSheet('Rangkuman AI', _summaryText!);
+                                                    } else {
+                                                      if (isEmpty) {
+                                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));
+                                                        return;
+                                                      }
+                                                      context.read<AiBloc>().add(
+                                                        ProcessTextRequested(
+                                                          text: _quillController.document.toPlainText(),
+                                                          action: 'summary',
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(20),
+                                                    child: Row(
+                                                      children: [
+                                                        Container(
+                                                          padding: const EdgeInsets.all(12),
+                                                          decoration: const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                          child: const Icon(Icons.auto_awesome_rounded, color: Color(0xFF8B5CF6)),
+                                                        ),
+                                                        const SizedBox(width: 16),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                hasSummary ? 'Rangkuman AI Tersedia' : 'Rangkuman AI',
+                                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
+                                                              ),
+                                                              Text(
+                                                                hasSummary ? 'Ketuk untuk melihat hasil rangkuman.' : 'Belum ada rangkuman catatan. Ketuk untuk merangkum.',
+                                                                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black38),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 16),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [Color(0xFFDCFCE7), Color(0xFFD1FAE5)],
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                ),
+                                                borderRadius: BorderRadius.circular(20),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.green.withValues(alpha: 0.15),
+                                                    blurRadius: 15,
+                                                    offset: const Offset(0, 5),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius: BorderRadius.circular(20),
+                                                  onTap: () {
+                                                    if (hasTranslate) {
+                                                      _showAiResultSheet('Terjemahan (${_translateLang ?? ''})', _translateText!);
+                                                    } else {
+                                                      if (isEmpty) {
+                                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));
+                                                        return;
+                                                      }
+                                                      _showLanguagePicker();
+                                                    }
+                                                  },
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.all(20),
+                                                    child: Row(
+                                                      children: [
+                                                        Container(
+                                                          padding: const EdgeInsets.all(12),
+                                                          decoration: const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                          child: const Icon(Icons.language_rounded, color: Colors.green),
+                                                        ),
+                                                        const SizedBox(width: 16),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                hasTranslate ? 'Terjemahan ${_translateLang ?? 'Tersedia'}' : 'Terjemahan',
+                                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
+                                                              ),
+                                                              Text(
+                                                                hasTranslate ? 'Ketuk untuk melihat hasil terjemahan.' : 'Belum ada terjemahan catatan. Ketuk untuk menerjemahkan.',
+                                                                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black38),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (_summaryText != null)
-                                    ElevatedButton.icon(
-                                      onPressed: () => _showAiResultSheet(
-                                        'Rangkuman AI',
-                                        _summaryText!,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.summarize_rounded,
-                                        color: Color(0xFF4F64F2),
-                                      ),
-                                      label: const Text(
-                                        'Lihat Rangkuman',
-                                        style: TextStyle(
-                                          color: Color(0xFF4F64F2),
-                                        ),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(
-                                          0xFF4F64F2,
-                                        ).withValues(alpha: 0.1),
-                                        elevation: 0,
-                                        alignment: Alignment.centerLeft,
-                                      ),
-                                    ),
-                                  if (_summaryText != null &&
-                                      _translateText != null)
-                                    const SizedBox(height: 12),
-                                  if (_translateText != null)
-                                    ElevatedButton.icon(
-                                      onPressed: () => _showAiResultSheet(
-                                        'Terjemahan (${_translateLang ?? 'B. Lain'})',
-                                        _translateText!,
-                                      ),
-                                      icon: const Icon(
-                                        Icons.language_rounded,
-                                        color: Colors.green,
-                                      ),
-                                      label: const Text(
-                                        'Lihat Terjemahan',
-                                        style: TextStyle(color: Colors.green),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green
-                                            .withValues(alpha: 0.1),
-                                        elevation: 0,
-                                        alignment: Alignment.centerLeft,
-                                      ),
-                                    ),
-                                ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Floating Dock (Glassmorphism Toolbar + Mic)
+              Positioned(
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom + 10 : 30,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(30),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Format Tools
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: ListenableBuilder(
+                                listenable: _quillController,
+                                builder: (context, child) {
+                                  return Row(
+                                    children: [
+                                      Container(width: 1, height: 24, color: Colors.transparent, margin: const EdgeInsets.symmetric(horizontal: 4)),
+                                      IconButton(icon: const Icon(Icons.text_fields_rounded, size: 22, color: navyColor), onPressed: _showFormatToolbar),
+                                      IconButton(icon: const Icon(Icons.check_box_outlined, size: 22, color: navyColor), onPressed: _toggleChecklist),
+                                      IconButton(icon: const Icon(Icons.format_list_bulleted_rounded, size: 22, color: navyColor), onPressed: _toggleBulletList),
+                                      IconButton(icon: const Icon(Icons.image_outlined, size: 22, color: navyColor), onPressed: _pickImage),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
-                          const SizedBox(height: 100),
+                          ),
+                          // Mic Button
+                          _buildFloatingMicButton(aiState, primaryColor),
                         ],
                       ),
                     ),
                   ),
-                ],
-              ),
-
-              Positioned(
-                bottom: 20,
-                right: 24,
-                child: _buildFloatingMicButton(aiState, primaryColor),
+                ),
               ),
             ],
-          ),
-          bottomNavigationBar: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 10,
-              top: 10,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildToolbarIcon(
-                  Icons.text_fields_rounded,
-                  label: 'Aa',
-                  onTap: _showFormatToolbar,
-                ),
-                _buildToolbarIcon(
-                  Icons.check_box_outlined,
-                  onTap: _toggleChecklist,
-                ),
-                _buildToolbarIcon(
-                  Icons.brush_rounded,
-                  onTap: () =>
-                      _showNotSupported('Fitur menggambar akan segera hadir!'),
-                ),
-                _buildToolbarIcon(Icons.image_outlined, onTap: _pickImage),
-                _buildToolbarIcon(
-                  Icons.emoji_emotions_outlined,
-                  onTap: () =>
-                      _showNotSupported('Gunakan emoji pada keyboard Anda.'),
-                ),
-                _buildToolbarIcon(
-                  Icons.grid_4x4_rounded,
-                  onTap: _showThemePicker,
-                ),
-                _buildToolbarIcon(Icons.list_rounded, onTap: _toggleBulletList),
-              ],
-            ),
           ),
         );
       },

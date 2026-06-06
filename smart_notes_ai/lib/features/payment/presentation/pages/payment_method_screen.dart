@@ -83,88 +83,143 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               children: [
                 // Header
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF4F64F2), Color(0xFF3B4CEB)],
+                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.3),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.star_rounded, size: 48, color: Colors.amber),
-                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.workspace_premium_rounded, size: 48, color: Color(0xFFF59E0B)),
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Smart Notes AI PRO',
-                        style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.white, 
+                          fontSize: 24, 
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Text(
-                        'AI Tanpa Batas — Voice, Summarize, Translate',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 14),
+                        'Buka semua fitur cerdas tanpa batas.\nTermasuk Voice, Summarize, dan Translate.',
+                        style: TextStyle(
+                          color: Colors.white70, 
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 28),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        child: const Text(
-                          'Rp 15.000',
-                          style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              'Rp',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              '15.000',
+                              style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, height: 1),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 36),
 
                 // Pilih Metode Pembayaran
-                const Text(
-                  'PILIH METODE PEMBAYARAN',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: navyColor,
-                    letterSpacing: 1.2,
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'PILIH METODE PEMBAYARAN',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: navyColor,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
 
                 _buildBankCard(
                   bankName: 'BCA Virtual Account',
                   bankCode: 'BCA',
-                  iconColor: const Color(0xFF003E7E),
+                  iconColor: const Color(0xFF005CAA),
                 ),
-                const SizedBox(height: 12),
                 _buildBankCard(
                   bankName: 'Mandiri Virtual Account',
                   bankCode: 'MANDIRI',
                   iconColor: const Color(0xFF003A70),
                 ),
-                const SizedBox(height: 12),
                 _buildBankCard(
                   bankName: 'BRI Virtual Account',
                   bankCode: 'BRI',
                   iconColor: const Color(0xFF00529C),
                 ),
-                const SizedBox(height: 12),
                 _buildBankCard(
                   bankName: 'BNI Virtual Account',
                   bankCode: 'BNI',
                   iconColor: const Color(0xFFEF6C00),
                 ),
+                const SizedBox(height: 24),
               ],
             ),
     );
@@ -175,50 +230,97 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     required String bankCode,
     required Color iconColor,
   }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: () => _selectBank(bankCode),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: navyColor.withValues(alpha: 0.06)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: navyColor.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  bankCode,
-                  style: TextStyle(
-                    color: iconColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: bankCode.length > 3 ? 9 : 12,
+        ],
+        border: Border.all(color: navyColor.withValues(alpha: 0.04)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _selectBank(bankCode),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: navyColor.withValues(alpha: 0.06)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: navyColor.withValues(alpha: 0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    bankCode,
+                    style: TextStyle(
+                      color: iconColor,
+                      fontWeight: FontWeight.w900,
+                      fontSize: bankCode.length > 3 ? 10 : 15,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  bankName,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: navyColor,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        bankName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: navyColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.check_circle_rounded, size: 12, color: Colors.green.shade600),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Otomatis terverifikasi',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: navyColor.withValues(alpha: 0.5),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: navyColor.withValues(alpha: 0.3)),
-            ],
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: navyColor.withValues(alpha: 0.05)),
+                  ),
+                  child: Icon(Icons.arrow_forward_rounded, size: 18, color: navyColor.withValues(alpha: 0.4)),
+                ),
+              ],
+            ),
           ),
         ),
       ),
