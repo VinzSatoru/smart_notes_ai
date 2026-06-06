@@ -15,8 +15,8 @@ class AudioRecorderService {
 
   Future<void> startRecording() async {
     if (await hasPermission()) {
-      final Directory tempDir = await getTemporaryDirectory();
-      _currentPath = '${tempDir.path}/smart_notes_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      final Directory docDir = await getApplicationDocumentsDirectory();
+      _currentPath = '${docDir.path}/smart_notes_audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
       _accumulatedDuration = 0;
       _isPaused = false;
       _startTime = DateTime.now();

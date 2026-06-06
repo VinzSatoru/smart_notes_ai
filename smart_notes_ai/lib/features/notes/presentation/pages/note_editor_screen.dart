@@ -13,9 +13,9 @@ import 'package:smart_notes_ai/features/ai/presentation/bloc/ai_state.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
+import 'package:smart_notes_ai/features/payment/presentation/pages/payment_method_screen.dart';
 
 const Color navyColor = Color(0xFF1E293B);
 const Color primaryColor = Color(0xFF4F64F2);
@@ -48,12 +48,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   String? _summaryText;
   String? _translateText;
   String? _translateLang;
-  
+
   Timer? _recordTimer;
   final ValueNotifier<int> _recordDuration = ValueNotifier<int>(0);
 
   late UndoHistoryController _undoController;
-  
+
   // Theme state
   Color _currentBgColor = const Color(0xFFF8F9FF);
   PaperPattern _currentPattern = PaperPattern.none;
@@ -62,10 +62,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title ?? '');
-    
+
     quill.Document document;
     final initialContent = widget.note?.contentText ?? '';
-    if (initialContent.trim().startsWith('[') && initialContent.trim().endsWith(']')) {
+    if (initialContent.trim().startsWith('[') &&
+        initialContent.trim().endsWith(']')) {
       try {
         final decoded = jsonDecode(initialContent);
         document = quill.Document.fromJson(decoded);
@@ -80,13 +81,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       document: document,
       selection: const TextSelection.collapsed(offset: 0),
     );
-    
-    _undoController = UndoHistoryController(); // Used only for title now if needed, but we might remove it. Let's keep it for compatibility.
+
+    _undoController =
+        UndoHistoryController(); // Used only for title now if needed, but we might remove it. Let's keep it for compatibility.
     _summaryText = widget.note?.aiSummary;
     _translateText = widget.note?.aiTranslation;
-    
+
     if (widget.note != null && widget.note!.categoryId.isNotEmpty) {
-      final exists = widget.categories.any((c) => c.id == widget.note!.categoryId);
+      final exists = widget.categories.any(
+        (c) => c.id == widget.note!.categoryId,
+      );
       if (exists) {
         _selectedCategoryId = widget.note!.categoryId;
       }
@@ -113,7 +117,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _saveNote() {
     final title = _titleController.text.trim();
     final contentPlainText = _quillController.document.toPlainText().trim();
-    final contentJson = jsonEncode(_quillController.document.toDelta().toJson());
+    final contentJson = jsonEncode(
+      _quillController.document.toDelta().toJson(),
+    );
 
     if (title.isEmpty && contentPlainText.isEmpty) {
       Navigator.pop(context);
@@ -121,26 +127,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
 
     if (widget.note == null) {
-      context.read<NotesBloc>().add(AddNoteEvent(
-            userId: widget.userId,
-            title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
-            contentText: contentJson,
-            categoryId: _selectedCategoryId ?? 'all',
-            aiSummary: _summaryText,
-            aiTranslation: _translateText,
-          ));
+      context.read<NotesBloc>().add(
+        AddNoteEvent(
+          userId: widget.userId,
+          title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
+          contentText: contentJson,
+          categoryId: _selectedCategoryId ?? 'all',
+          aiSummary: _summaryText,
+          aiTranslation: _translateText,
+        ),
+      );
     } else {
-      context.read<NotesBloc>().add(UpdateNoteEvent(
-            noteId: widget.note!.id,
-            userId: widget.userId,
-            title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
-            contentText: contentJson,
-            categoryId: _selectedCategoryId ?? 'all',
-            aiSummary: _summaryText,
-            aiTranslation: _translateText,
-          ));
+      context.read<NotesBloc>().add(
+        UpdateNoteEvent(
+          noteId: widget.note!.id,
+          userId: widget.userId,
+          title: title.isEmpty ? 'Catatan Tanpa Judul' : title,
+          contentText: contentJson,
+          categoryId: _selectedCategoryId ?? 'all',
+          aiSummary: _summaryText,
+          aiTranslation: _translateText,
+        ),
+      );
     }
-    
+
     Navigator.pop(context);
   }
 
@@ -153,7 +163,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           children: [
             Icon(Icons.workspace_premium_rounded, color: Color(0xFF4F64F2)),
             SizedBox(width: 10),
-            Text('Limit Tercapai', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Limit Tercapai',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         content: Text(message),
@@ -165,15 +178,24 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fitur Premium akan segera hadir!'), behavior: SnackBarBehavior.floating),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PaymentMethodScreen()),
               );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4F64F2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('Upgrade Pro', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Upgrade Pro',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -181,15 +203,20 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _shareNote() {
-    final title = _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : 'Catatan Tanpa Judul';
+    final title = _titleController.text.trim().isNotEmpty
+        ? _titleController.text.trim()
+        : 'Catatan Tanpa Judul';
     final content = _quillController.document.toPlainText().trim();
     if (content.isEmpty && title == 'Catatan Tanpa Judul') {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Catatan masih kosong.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
-    
+
     final shareText = '$title\n\n$content';
     Share.share(shareText);
   }
@@ -198,14 +225,23 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Format Teks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: navyColor)),
+              Text(
+                'Format Teks',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: navyColor,
+                ),
+              ),
               const SizedBox(height: 16),
               quill.QuillToolbar.simple(
                 configurations: quill.QuillSimpleToolbarConfigurations(
@@ -235,14 +271,29 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _toggleChecklist() {
-    final isChecked = _quillController.getSelectionStyle().containsKey(quill.Attribute.unchecked.key) ||
-        _quillController.getSelectionStyle().containsKey(quill.Attribute.checked.key);
-    _quillController.formatSelection(isChecked ? quill.Attribute.clone(quill.Attribute.unchecked, null) : quill.Attribute.unchecked);
+    final isChecked =
+        _quillController.getSelectionStyle().containsKey(
+          quill.Attribute.unchecked.key,
+        ) ||
+        _quillController.getSelectionStyle().containsKey(
+          quill.Attribute.checked.key,
+        );
+    _quillController.formatSelection(
+      isChecked
+          ? quill.Attribute.clone(quill.Attribute.unchecked, null)
+          : quill.Attribute.unchecked,
+    );
   }
 
   void _toggleBulletList() {
-    final isList = _quillController.getSelectionStyle().containsKey(quill.Attribute.ul.key);
-    _quillController.formatSelection(isList ? quill.Attribute.clone(quill.Attribute.ul, null) : quill.Attribute.ul);
+    final isList = _quillController.getSelectionStyle().containsKey(
+      quill.Attribute.ul.key,
+    );
+    _quillController.formatSelection(
+      isList
+          ? quill.Attribute.clone(quill.Attribute.ul, null)
+          : quill.Attribute.ul,
+    );
   }
 
   Future<void> _pickImage() async {
@@ -251,7 +302,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (pickedFile != null) {
       final index = _quillController.selection.baseOffset;
       final length = _quillController.selection.extentOffset - index;
-      _quillController.replaceText(index, length, quill.BlockEmbed.image(pickedFile.path), null);
+      _quillController.replaceText(
+        index,
+        length,
+        quill.BlockEmbed.image(pickedFile.path),
+        null,
+      );
     }
   }
 
@@ -264,7 +320,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showMoreOptions() {
     if (widget.note == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Simpan catatan terlebih dahulu untuk opsi tambahan.'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Simpan catatan terlebih dahulu untuk opsi tambahan.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -272,54 +331,117 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (bottomSheetContext) {
         return BlocBuilder<NotesBloc, NotesState>(
           builder: (context, state) {
-            final matchingNotes = state.notes.where((n) => n.id == widget.note!.id);
-            final note = matchingNotes.isNotEmpty ? matchingNotes.first : widget.note!;
-            
+            final matchingNotes = state.notes.where(
+              (n) => n.id == widget.note!.id,
+            );
+            final note = matchingNotes.isNotEmpty
+                ? matchingNotes.first
+                : widget.note!;
+
             return SafeArea(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 8),
-                  Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   ListTile(
-                    leading: Icon(note.isPinned ? Icons.push_pin_outlined : Icons.push_pin, color: const Color(0xFF4F64F2)),
-                    title: Text(note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    leading: Icon(
+                      note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                      color: const Color(0xFF4F64F2),
+                    ),
+                    title: Text(
+                      note.isPinned ? 'Lepas Sematan' : 'Sematkan Catatan',
+                      style: const TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onTap: () {
-                      context.read<NotesBloc>().add(TogglePinEvent(note: note, userId: widget.userId));
+                      context.read<NotesBloc>().add(
+                        TogglePinEvent(note: note, userId: widget.userId),
+                      );
                     },
                   ),
                   ListTile(
-                    leading: Icon(note.isFavorite ? Icons.star_rounded : Icons.star_border_rounded, color: const Color(0xFFF59E0B)),
-                    title: Text(note.isFavorite ? 'Batal Favorit' : 'Tambahkan ke Favorit', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    leading: Icon(
+                      note.isFavorite
+                          ? Icons.star_rounded
+                          : Icons.star_border_rounded,
+                      color: const Color(0xFFF59E0B),
+                    ),
+                    title: Text(
+                      note.isFavorite
+                          ? 'Batal Favorit'
+                          : 'Tambahkan ke Favorit',
+                      style: const TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onTap: () {
-                      context.read<NotesBloc>().add(ToggleFavoriteEvent(note: note));
+                      context.read<NotesBloc>().add(
+                        ToggleFavoriteEvent(note: note),
+                      );
                     },
                   ),
                   ListTile(
-                    leading: Icon(note.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined, color: Colors.teal),
-                    title: Text(note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan', style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w600)),
+                    leading: Icon(
+                      note.isArchived
+                          ? Icons.unarchive_outlined
+                          : Icons.archive_outlined,
+                      color: Colors.teal,
+                    ),
+                    title: Text(
+                      note.isArchived ? 'Batal Arsip' : 'Arsipkan Catatan',
+                      style: const TextStyle(
+                        color: Color(0xFF1E293B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onTap: () {
-                      context.read<NotesBloc>().add(ToggleArchiveEvent(note: note));
+                      context.read<NotesBloc>().add(
+                        ToggleArchiveEvent(note: note),
+                      );
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                    title: const Text('Buang ke Sampah', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                    leading: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                    ),
+                    title: const Text(
+                      'Buang ke Sampah',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     onTap: () {
                       Navigator.pop(bottomSheetContext);
                       Navigator.pop(this.context);
-                      context.read<NotesBloc>().add(MoveToTrashEvent(note: note));
+                      context.read<NotesBloc>().add(
+                        MoveToTrashEvent(note: note),
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
                 ],
               ),
             );
-          }
+          },
         );
       },
     );
@@ -329,7 +451,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -339,50 +463,83 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Pilih Tema Kertas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Pilih Tema Kertas',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildPatternOption(PaperPattern.none, 'Polos', setModalState),
-                      _buildPatternOption(PaperPattern.ruled, 'Garis', setModalState),
-                      _buildPatternOption(PaperPattern.grid, 'Kotak', setModalState),
+                      _buildPatternOption(
+                        PaperPattern.none,
+                        'Polos',
+                        setModalState,
+                      ),
+                      _buildPatternOption(
+                        PaperPattern.ruled,
+                        'Garis',
+                        setModalState,
+                      ),
+                      _buildPatternOption(
+                        PaperPattern.grid,
+                        'Kotak',
+                        setModalState,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 30),
-                  const Text('Pilih Warna', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Pilih Warna',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 16),
                   SizedBox(
                     height: 50,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        const Color(0xFFFFFFFF),
-                        const Color(0xFFF8F9FF),
-                        const Color(0xFFFDF8FF),
-                        const Color(0xFFF8FFF9),
-                        const Color(0xFFFFFBF0),
-                        const Color(0xFFD7FBE1),
-                        const Color(0xFFE5DEFF),
-                      ].map((color) => GestureDetector(
-                        onTap: () {
-                          setModalState(() => _currentBgColor = color);
-                          setState(() => _currentBgColor = color);
-                        },
-                        child: Container(
-                          width: 50,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _currentBgColor == color ? const Color(0xFF4F64F2) : Colors.grey.shade300,
-                              width: _currentBgColor == color ? 3 : 1,
-                            ),
-                          ),
-                          child: _currentBgColor == color ? const Icon(Icons.check, color: Color(0xFF4F64F2), size: 20) : null,
-                        ),
-                      )).toList(),
+                      children:
+                          [
+                                const Color(0xFFFFFFFF),
+                                const Color(0xFFF8F9FF),
+                                const Color(0xFFFDF8FF),
+                                const Color(0xFFF8FFF9),
+                                const Color(0xFFFFFBF0),
+                                const Color(0xFFD7FBE1),
+                                const Color(0xFFE5DEFF),
+                              ]
+                              .map(
+                                (color) => GestureDetector(
+                                  onTap: () {
+                                    setModalState(
+                                      () => _currentBgColor = color,
+                                    );
+                                    setState(() => _currentBgColor = color);
+                                  },
+                                  child: Container(
+                                    width: 50,
+                                    margin: const EdgeInsets.only(right: 12),
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: _currentBgColor == color
+                                            ? const Color(0xFF4F64F2)
+                                            : Colors.grey.shade300,
+                                        width: _currentBgColor == color ? 3 : 1,
+                                      ),
+                                    ),
+                                    child: _currentBgColor == color
+                                        ? const Icon(
+                                            Icons.check,
+                                            color: Color(0xFF4F64F2),
+                                            size: 20,
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -395,7 +552,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
-  Widget _buildPatternOption(PaperPattern pattern, String label, Function setModalState) {
+  Widget _buildPatternOption(
+    PaperPattern pattern,
+    String label,
+    Function setModalState,
+  ) {
     bool isSelected = _currentPattern == pattern;
     return GestureDetector(
       onTap: () {
@@ -407,17 +568,35 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF4F64F2).withValues(alpha: 0.1) : Colors.grey.shade100,
+              color: isSelected
+                  ? const Color(0xFF4F64F2).withValues(alpha: 0.1)
+                  : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: isSelected ? const Color(0xFF4F64F2) : Colors.transparent, width: 2),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF4F64F2)
+                    : Colors.transparent,
+                width: 2,
+              ),
             ),
             child: Icon(
-              pattern == PaperPattern.none ? Icons.crop_square : (pattern == PaperPattern.ruled ? Icons.reorder : Icons.grid_4x4),
+              pattern == PaperPattern.none
+                  ? Icons.crop_square
+                  : (pattern == PaperPattern.ruled
+                        ? Icons.reorder
+                        : Icons.grid_4x4),
               color: isSelected ? const Color(0xFF4F64F2) : Colors.grey,
             ),
           ),
           const SizedBox(height: 8),
-          Text(label, style: TextStyle(fontSize: 12, color: isSelected ? const Color(0xFF4F64F2) : Colors.grey, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: isSelected ? const Color(0xFF4F64F2) : Colors.grey,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -426,7 +605,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showMagicAiSheet() {
     if (_quillController.document.toPlainText().trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating),
+        const SnackBar(
+          content: Text('Catatan masih kosong.'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
@@ -434,7 +616,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Padding(
@@ -445,28 +629,58 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               children: [
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('✨ Magic AI', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                  child: Text(
+                    '✨ Magic AI',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: Color(0xFFE5DEFF), child: Icon(Icons.summarize_rounded, color: Color(0xFF4F64F2))),
-                  title: const Text('Rangkum Catatan', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Maks. 5x sehari', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFE5DEFF),
+                    child: Icon(
+                      Icons.summarize_rounded,
+                      color: Color(0xFF4F64F2),
+                    ),
+                  ),
+                  title: const Text(
+                    'Rangkum Catatan',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Maks. 5x sehari',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
-                    context.read<AiBloc>().add(ProcessTextRequested(
-                      text: _quillController.document.toPlainText(),
-                      action: 'summary',
-                    ));
+                    context.read<AiBloc>().add(
+                      ProcessTextRequested(
+                        text: _quillController.document.toPlainText(),
+                        action: 'summary',
+                      ),
+                    );
                   },
                 ),
                 ListTile(
-                  leading: const CircleAvatar(backgroundColor: Color(0xFFD7FBE1), child: Icon(Icons.language_rounded, color: Colors.green)),
-                  title: const Text('Terjemahkan ke...', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Gratis tanpa batas', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFD7FBE1),
+                    child: Icon(Icons.language_rounded, color: Colors.green),
+                  ),
+                  title: const Text(
+                    'Terjemahkan ke...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: const Text(
+                    'Gratis tanpa batas',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   onTap: () {
                     Navigator.pop(context); // Tutup sheet pertama
-                    _showLanguagePicker();  // Buka opsi bahasa
+                    _showLanguagePicker(); // Buka opsi bahasa
                   },
                 ),
               ],
@@ -492,7 +706,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return SafeArea(
           child: Padding(
@@ -503,7 +719,14 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               children: [
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('🌐 Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                  child: Text(
+                    '🌐 Pilih Bahasa',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Expanded(
@@ -514,13 +737,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       final lang = languages[index];
                       return ListTile(
                         title: Text(lang['name']!),
-                        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+                        trailing: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         onTap: () {
                           Navigator.pop(context);
-                          context.read<AiBloc>().add(ProcessTextRequested(
-                            text: _quillController.document.toPlainText(),
-                            action: 'translate:${lang['code']}',
-                          ));
+                          context.read<AiBloc>().add(
+                            ProcessTextRequested(
+                              text: _quillController.document.toPlainText(),
+                              action: 'translate:${lang['code']}',
+                            ),
+                          );
                         },
                       );
                     },
@@ -539,7 +768,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.6,
@@ -556,11 +787,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.grey,
+                          ),
                           onPressed: () => Navigator.pop(context),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -569,7 +810,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         controller: scrollController,
                         child: Text(
                           content,
-                          style: TextStyle(fontSize: 16, color: const Color(0xFF1E293B).withValues(alpha: 0.8), height: 1.6),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: const Color(
+                              0xFF1E293B,
+                            ).withValues(alpha: 0.8),
+                            height: 1.6,
+                          ),
                         ),
                       ),
                     ),
@@ -609,17 +856,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             if (currentText.isEmpty) {
               _quillController.document.insert(0, state.text);
             } else {
-              _quillController.document.insert(_quillController.document.length - 1, '\n${state.text}');
+              _quillController.document.insert(
+                _quillController.document.length - 1,
+                '\n${state.text}',
+              );
             }
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Transkripsi suara ditambahkan'), behavior: SnackBarBehavior.floating),
+              const SnackBar(
+                content: Text('Transkripsi suara ditambahkan'),
+                behavior: SnackBarBehavior.floating,
+              ),
             );
           } else if (state.action == 'summary') {
             setState(() {
               _summaryText = state.text;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Rangkuman berhasil dibuat ✨'), behavior: SnackBarBehavior.floating),
+              const SnackBar(
+                content: Text('Rangkuman berhasil dibuat ✨'),
+                behavior: SnackBarBehavior.floating,
+              ),
             );
           } else if (state.action.startsWith('translate:')) {
             setState(() {
@@ -627,19 +883,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               _translateText = state.text;
             });
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Terjemahan berhasil dibuat ✨'), behavior: SnackBarBehavior.floating),
+              const SnackBar(
+                content: Text('Terjemahan berhasil dibuat ✨'),
+                behavior: SnackBarBehavior.floating,
+              ),
             );
           }
         } else if (state is AiProcessingText) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✨ Memproses teks...'), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 1)),
+            const SnackBar(
+              content: Text('✨ Memproses teks...'),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 1),
+            ),
           );
         } else if (state is AiFailure) {
           if (state.isQuotaExceeded) {
             _showUpgradeDialog(context, state.message);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
             );
           }
         }
@@ -655,7 +922,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               onPressed: _saveNote,
             ),
             actions: [
-              IconButton(icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)), onPressed: _showMagicAiSheet),
+              IconButton(
+                icon: const Icon(Icons.auto_awesome, color: Color(0xFF4F64F2)),
+                onPressed: _showMagicAiSheet,
+              ),
               ListenableBuilder(
                 listenable: _quillController,
                 builder: (context, child) {
@@ -663,19 +933,43 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.undo_rounded, color: _quillController.hasUndo ? navyColor : Colors.grey),
-                        onPressed: _quillController.hasUndo ? () => _quillController.undo() : null,
+                        icon: Icon(
+                          Icons.undo_rounded,
+                          color: _quillController.hasUndo
+                              ? navyColor
+                              : Colors.grey,
+                        ),
+                        onPressed: _quillController.hasUndo
+                            ? () => _quillController.undo()
+                            : null,
                       ),
                       IconButton(
-                        icon: Icon(Icons.redo_rounded, color: _quillController.hasRedo ? navyColor : Colors.grey),
-                        onPressed: _quillController.hasRedo ? () => _quillController.redo() : null,
+                        icon: Icon(
+                          Icons.redo_rounded,
+                          color: _quillController.hasRedo
+                              ? navyColor
+                              : Colors.grey,
+                        ),
+                        onPressed: _quillController.hasRedo
+                            ? () => _quillController.redo()
+                            : null,
                       ),
                     ],
                   );
                 },
               ),
-              IconButton(icon: const Icon(Icons.ios_share_rounded, color: navyColor, size: 22), onPressed: _shareNote),
-              IconButton(icon: const Icon(Icons.more_vert_rounded, color: navyColor), onPressed: _showMoreOptions),
+              IconButton(
+                icon: const Icon(
+                  Icons.ios_share_rounded,
+                  color: navyColor,
+                  size: 22,
+                ),
+                onPressed: _shareNote,
+              ),
+              IconButton(
+                icon: const Icon(Icons.more_vert_rounded, color: navyColor),
+                onPressed: _showMoreOptions,
+              ),
             ],
           ),
           body: Stack(
@@ -683,30 +977,58 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               if (_currentPattern != PaperPattern.none)
                 Positioned.fill(
                   child: CustomPaint(
-                    painter: PaperPainter(pattern: _currentPattern, color: navyColor.withValues(alpha: 0.1)),
+                    painter: PaperPainter(
+                      pattern: _currentPattern,
+                      color: navyColor.withValues(alpha: 0.1),
+                    ),
                   ),
                 ),
               Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('$dayFormatted, $timeFormatted', style: TextStyle(color: navyColor.withValues(alpha: 0.4), fontWeight: FontWeight.w500)),
+                        Text(
+                          '$dayFormatted, $timeFormatted',
+                          style: TextStyle(
+                            color: navyColor.withValues(alpha: 0.4),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         GestureDetector(
                           onTap: () => _showCategoryPicker(),
                           child: Row(
                             children: [
-                              Icon(Icons.book_outlined, size: 16, color: navyColor.withValues(alpha: 0.6)),
+                              Icon(
+                                Icons.book_outlined,
+                                size: 16,
+                                color: navyColor.withValues(alpha: 0.6),
+                              ),
                               const SizedBox(width: 8),
                               Text(
-                                _selectedCategoryId == null || _selectedCategoryId == 'all' 
-                                  ? 'Tanpa Kategori' 
-                                  : widget.categories.firstWhere((c) => c.id == _selectedCategoryId).name,
-                                style: TextStyle(color: navyColor.withValues(alpha: 0.6), fontWeight: FontWeight.w600),
+                                _selectedCategoryId == null ||
+                                        _selectedCategoryId == 'all'
+                                    ? 'Tanpa Kategori'
+                                    : widget.categories
+                                          .firstWhere(
+                                            (c) => c.id == _selectedCategoryId,
+                                          )
+                                          .name,
+                                style: TextStyle(
+                                  color: navyColor.withValues(alpha: 0.6),
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                              Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: navyColor.withValues(alpha: 0.4)),
+                              Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 20,
+                                color: navyColor.withValues(alpha: 0.4),
+                              ),
                             ],
                           ),
                         ),
@@ -721,8 +1043,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         children: [
                           TextField(
                             controller: _titleController,
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: navyColor),
-                            decoration: const InputDecoration(hintText: 'Judul', hintStyle: TextStyle(color: Colors.black26), border: InputBorder.none),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: navyColor,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Judul',
+                              hintStyle: TextStyle(color: Colors.black26),
+                              border: InputBorder.none,
+                            ),
                             maxLines: null,
                             contextMenuBuilder: (context, editableTextState) {
                               return AdaptiveTextSelectionToolbar.editableText(
@@ -745,30 +1075,60 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10)],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   if (_summaryText != null)
                                     ElevatedButton.icon(
-                                      onPressed: () => _showAiResultSheet('Rangkuman AI', _summaryText!),
-                                      icon: const Icon(Icons.summarize_rounded, color: Color(0xFF4F64F2)),
-                                      label: const Text('Lihat Rangkuman', style: TextStyle(color: Color(0xFF4F64F2))),
+                                      onPressed: () => _showAiResultSheet(
+                                        'Rangkuman AI',
+                                        _summaryText!,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.summarize_rounded,
+                                        color: Color(0xFF4F64F2),
+                                      ),
+                                      label: const Text(
+                                        'Lihat Rangkuman',
+                                        style: TextStyle(
+                                          color: Color(0xFF4F64F2),
+                                        ),
+                                      ),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF4F64F2).withValues(alpha: 0.1),
+                                        backgroundColor: const Color(
+                                          0xFF4F64F2,
+                                        ).withValues(alpha: 0.1),
                                         elevation: 0,
                                         alignment: Alignment.centerLeft,
                                       ),
                                     ),
-                                  if (_summaryText != null && _translateText != null) const SizedBox(height: 12),
+                                  if (_summaryText != null &&
+                                      _translateText != null)
+                                    const SizedBox(height: 12),
                                   if (_translateText != null)
                                     ElevatedButton.icon(
-                                      onPressed: () => _showAiResultSheet('Terjemahan (${_translateLang ?? 'B. Lain'})', _translateText!),
-                                      icon: const Icon(Icons.language_rounded, color: Colors.green),
-                                      label: const Text('Lihat Terjemahan', style: TextStyle(color: Colors.green)),
+                                      onPressed: () => _showAiResultSheet(
+                                        'Terjemahan (${_translateLang ?? 'B. Lain'})',
+                                        _translateText!,
+                                      ),
+                                      icon: const Icon(
+                                        Icons.language_rounded,
+                                        color: Colors.green,
+                                      ),
+                                      label: const Text(
+                                        'Lihat Terjemahan',
+                                        style: TextStyle(color: Colors.green),
+                                      ),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.green.withValues(alpha: 0.1),
+                                        backgroundColor: Colors.green
+                                            .withValues(alpha: 0.1),
                                         elevation: 0,
                                         alignment: Alignment.centerLeft,
                                       ),
@@ -783,7 +1143,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   ),
                 ],
               ),
-              
+
               Positioned(
                 bottom: 20,
                 right: 24,
@@ -792,21 +1152,50 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             ],
           ),
           bottomNavigationBar: Container(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + 10, top: 10),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+              top: 10,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -2))],
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildToolbarIcon(Icons.text_fields_rounded, label: 'Aa', onTap: _showFormatToolbar),
-                _buildToolbarIcon(Icons.check_box_outlined, onTap: _toggleChecklist),
-                _buildToolbarIcon(Icons.brush_rounded, onTap: () => _showNotSupported('Fitur menggambar akan segera hadir!')),
+                _buildToolbarIcon(
+                  Icons.text_fields_rounded,
+                  label: 'Aa',
+                  onTap: _showFormatToolbar,
+                ),
+                _buildToolbarIcon(
+                  Icons.check_box_outlined,
+                  onTap: _toggleChecklist,
+                ),
+                _buildToolbarIcon(
+                  Icons.brush_rounded,
+                  onTap: () =>
+                      _showNotSupported('Fitur menggambar akan segera hadir!'),
+                ),
                 _buildToolbarIcon(Icons.image_outlined, onTap: _pickImage),
-                _buildToolbarIcon(Icons.emoji_emotions_outlined, onTap: () => _showNotSupported('Gunakan emoji pada keyboard Anda.')),
-                _buildToolbarIcon(Icons.grid_4x4_rounded, onTap: _showThemePicker),
+                _buildToolbarIcon(
+                  Icons.emoji_emotions_outlined,
+                  onTap: () =>
+                      _showNotSupported('Gunakan emoji pada keyboard Anda.'),
+                ),
+                _buildToolbarIcon(
+                  Icons.grid_4x4_rounded,
+                  onTap: _showThemePicker,
+                ),
                 _buildToolbarIcon(Icons.list_rounded, onTap: _toggleBulletList),
               ],
             ),
@@ -831,7 +1220,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         child: const SizedBox(
           width: 24,
           height: 24,
-          child: CircularProgressIndicator(color: Color(0xFF4F64F2), strokeWidth: 2),
+          child: CircularProgressIndicator(
+            color: Color(0xFF4F64F2),
+            strokeWidth: 2,
+          ),
         ),
       );
     }
@@ -846,14 +1238,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               final minutes = (duration ~/ 60).toString().padLeft(2, '0');
               final seconds = (duration % 60).toString().padLeft(2, '0');
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
                   '$minutes:$seconds',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               );
             },
@@ -884,7 +1283,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 context.read<AiBloc>().add(CheckQuotaAndStartRecording());
               }
             },
-            backgroundColor: isRecording ? Colors.red : (isPaused ? Colors.orange : primaryColor),
+            backgroundColor: isRecording
+                ? Colors.red
+                : (isPaused ? Colors.orange : primaryColor),
             elevation: 4,
             child: Icon(
               isRecording ? Icons.pause_rounded : Icons.mic_rounded,
@@ -897,14 +1298,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
-  Widget _buildToolbarIcon(IconData icon, {String? label, VoidCallback? onTap}) {
+  Widget _buildToolbarIcon(
+    IconData icon, {
+    String? label,
+    VoidCallback? onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: const Color(0xFF1E293B).withValues(alpha: 0.6), size: 24),
-          if (label != null) Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+          Icon(
+            icon,
+            color: const Color(0xFF1E293B).withValues(alpha: 0.6),
+            size: 24,
+          ),
+          if (label != null)
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
         ],
       ),
     );
@@ -914,36 +1331,56 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (bottomSheetContext) {
         return BlocBuilder<NotesBloc, NotesState>(
           builder: (context, state) {
             // Gunakan state.categories jika tersedia, jika tidak gunakan widget.categories
-            final currentCategories = state.categories.isNotEmpty ? state.categories : widget.categories;
-            
+            final currentCategories = state.categories.isNotEmpty
+                ? state.categories
+                : widget.categories;
+
             return ListView(
               shrinkWrap: true,
               padding: const EdgeInsets.all(24),
               children: [
-                const Text('Pilih Kategori', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Pilih Kategori',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16),
                 ListTile(
-                  leading: const Icon(Icons.add_circle_outline, color: Color(0xFF4F64F2)),
-                  title: const Text('Tambah Kategori', style: TextStyle(color: Color(0xFF4F64F2), fontWeight: FontWeight.bold)),
+                  leading: const Icon(
+                    Icons.add_circle_outline,
+                    color: Color(0xFF4F64F2),
+                  ),
+                  title: const Text(
+                    'Tambah Kategori',
+                    style: TextStyle(
+                      color: Color(0xFF4F64F2),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(bottomSheetContext);
                     _showAddCategoryDialog();
                   },
                 ),
                 const Divider(),
-                ...currentCategories.map((c) => ListTile(
-                  title: Text(c.name),
-                  trailing: _selectedCategoryId == c.id ? const Icon(Icons.check, color: Color(0xFF4F64F2)) : null,
-                  onTap: () {
-                    setState(() => _selectedCategoryId = c.id);
-                    Navigator.pop(bottomSheetContext);
-                  },
-                )),
+                ...currentCategories.map(
+                  (c) => ListTile(
+                    title: Text(c.name),
+                    trailing: _selectedCategoryId == c.id
+                        ? const Icon(Icons.check, color: Color(0xFF4F64F2))
+                        : null,
+                    onTap: () {
+                      setState(() => _selectedCategoryId = c.id);
+                      Navigator.pop(bottomSheetContext);
+                    },
+                  ),
+                ),
               ],
             );
           },
@@ -959,16 +1396,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Kategori Baru', style: TextStyle(fontWeight: FontWeight.bold)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Kategori Baru',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: TextField(
             controller: categoryController,
             decoration: InputDecoration(
               hintText: 'Nama kategori (mis: Ide Bisnis)',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4F64F2), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF4F64F2),
+                  width: 2,
+                ),
               ),
             ),
             autofocus: true,
@@ -982,20 +1429,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               onPressed: () {
                 final name = categoryController.text.trim();
                 if (name.isNotEmpty) {
-                  context.read<NotesBloc>().add(AddCategoryEvent(userId: widget.userId, name: name));
+                  context.read<NotesBloc>().add(
+                    AddCategoryEvent(userId: widget.userId, name: name),
+                  );
                   Navigator.pop(dialogContext);
                   // Optionally, we could try to auto-select it once it's created, but that might be complex
                   // as it requires waiting for the state to update.
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Kategori "$name" ditambahkan!'), backgroundColor: Colors.green),
+                    SnackBar(
+                      content: Text('Kategori "$name" ditambahkan!'),
+                      backgroundColor: Colors.green,
+                    ),
                   );
                 }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4F64F2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: const Text('Simpan', style: TextStyle(color: Colors.white)),
+              child: const Text(
+                'Simpan',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );

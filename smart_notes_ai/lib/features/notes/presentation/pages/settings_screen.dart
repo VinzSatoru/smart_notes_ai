@@ -41,17 +41,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         builder: (context, authState) {
           String userName = 'Pengguna';
           String userEmail = 'user@example.com';
+          bool isPremium = false;
           
           if (authState is Authenticated) {
             userName = authState.user.name;
             userEmail = authState.user.email;
+            isPremium = authState.user.isPremium;
           }
 
           return ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             children: [
               // Profil Pengguna
-              _buildProfileCard(userName, userEmail),
+              _buildProfileCard(userName, userEmail, isPremium),
               const SizedBox(height: 32),
 
               // Preferensi Aplikasi
@@ -159,7 +161,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileCard(String name, String email) {
+  Widget _buildProfileCard(String name, String email, bool isPremium) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -232,21 +234,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              'PRO',
-              style: TextStyle(
-                color: Color(0xFF4F64F2),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
+          if (isPremium)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'PRO',
+                style: TextStyle(
+                  color: Color(0xFF4F64F2),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:smart_notes_ai/features/auth/data/datasources/auth_remote_data_s
 import 'package:smart_notes_ai/features/auth/domain/usecases/login_usecase.dart';
 import 'package:smart_notes_ai/features/auth/domain/usecases/register_usecase.dart';
 import 'package:smart_notes_ai/features/auth/domain/usecases/logout_usecase.dart';
+import 'package:smart_notes_ai/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:smart_notes_ai/features/auth/presentation/bloc/auth_bloc.dart';
 
 import 'package:smart_notes_ai/core/services/audio_recorder_service.dart';
@@ -42,6 +43,7 @@ Future<void> init() async {
       loginUseCase: sl(),
       registerUseCase: sl(),
       logoutUseCase: sl(),
+      getCurrentUserUseCase: sl(),
     ),
   );
 
@@ -49,6 +51,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => LogoutUseCase(sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(

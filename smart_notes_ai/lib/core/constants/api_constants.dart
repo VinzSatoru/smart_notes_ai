@@ -12,4 +12,9 @@ class ApiConstants {
 
   // Model AI untuk text processing (super cepat & cerdas)
   static const String groqTextModel = 'llama-3.1-8b-instant';
+
+  // DOKU Payment Gateway (Sandbox)
+  static String get dokuClientId => dotenv.env['DOKU_CLIENT_ID'] ?? '';
+  static String get dokuSecretKey => dotenv.env['DOKU_SECRET_KEY'] ?? '';
+  static const String dokuBaseUrl = 'https://api-sandbox.doku.com';
 }

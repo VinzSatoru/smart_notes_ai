@@ -3,6 +3,7 @@ import '../../../../core/usecases/usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/get_current_user_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -10,15 +11,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.registerUseCase,
     required this.logoutUseCase,
+    required this.getCurrentUserUseCase,
   }) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<LogoutRequested>(_onLogoutRequested);
+    on<AuthRefreshUserRequested>(_onRefreshUser);
   }
 
   Future<void> _onLoginRequested(
@@ -66,6 +70,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
       (_) => emit(Unauthenticated()),
+    );
+  }
+
+  Future<void> _onRefreshUser(
+    AuthRefreshUserRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await getCurrentUserUseCase(NoParams());
+    result.fold(
+      (_) {}, // Jika gagal, biarkan state apa adanya
+      (user) => emit(Authenticated(user: user)),
     );
   }
 }

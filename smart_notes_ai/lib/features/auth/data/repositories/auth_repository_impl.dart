@@ -67,6 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
       id: record.id,
       email: record.getStringValue('email'),
       name: record.getStringValue('name'),
+      isPremium: record.getStringValue('tier') == 'pro',
     );
   }
 }

@@ -17,6 +17,7 @@ import 'settings_screen.dart';
 import '../../domain/entities/note.dart';
 import '../../domain/entities/category.dart';
 import 'package:avatar_glow/avatar_glow.dart';
+import 'package:smart_notes_ai/features/payment/presentation/pages/payment_method_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -250,15 +251,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final authState = context.watch<AuthBloc>().state;
     String userName = 'Pengguna';
     String userId = '';
+    bool isPremium = false;
     if (authState is Authenticated) {
       userName = authState.user.name.split(' ')[0];
       userId = authState.user.id;
+      isPremium = authState.user.isPremium;
     }
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF8FAFC), // Slate 50
-      drawer: _buildDrawer(userName, userId),
+      drawer: _buildDrawer(userName, userId, isPremium),
       body: SafeArea(
         child: BlocBuilder<NotesBloc, NotesState>(
           builder: (context, state) {
@@ -503,7 +506,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildDrawer(String userName, String userId) {
+  Widget _buildDrawer(String userName, String userId, bool isPremium) {
     return Drawer(
       backgroundColor: const Color(0xFFFBFBFD),
       child: SafeArea(
@@ -526,33 +529,58 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4F64F2), Color(0xFF3B4CEB)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+              child: InkWell(
+                onTap: isPremium ? null : () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PaymentMethodScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isPremium
+                          ? [const Color(0xFFFFB300), const Color(0xFFFF8F00)]
+                          : [const Color(0xFF4F64F2), const Color(0xFF3B4CEB)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(color: (isPremium ? Colors.amber : primaryColor).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(color: primaryColor.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Expanded(child: Text('Dapatkan Premium', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isPremium ? Icons.workspace_premium_rounded : Icons.star_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          isPremium ? 'PRO Member' : 'Dapatkan Premium',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      if (!isPremium)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
                           child: Text('DAPATKAN', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 10)),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(12)),
+                          child: const Text('AKTIF ✓', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
                         ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
