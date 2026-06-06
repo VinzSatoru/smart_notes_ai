@@ -1,10 +1,8 @@
 import 'package:pocketbase/pocketbase.dart';
 
 class PocketBaseService {
-  // Ganti IP ini dengan IP lokal komputer Anda jika running di real device Android
-  // 10.0.2.2 adalah IP localhost komputer host jika dari Android Studio Emulator
-  // 127.0.0.1 bisa digunakan jika running di Windows/Web
-  static const String baseUrl = 'http://10.0.2.2:8090'; 
+  // Menggunakan IP lokal WiFi PC agar bisa diakses dari HP fisik di jaringan yang sama
+  static const String baseUrl = 'http://192.168.0.105:8090'; 
   
   late final PocketBase pb;
 

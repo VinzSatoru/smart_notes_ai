@@ -189,6 +189,11 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Rich Text Editor (`flutter_quill`)**: Transformasi besar-besaran editor dari sekadar teks polos (*plain text*) menjadi *Rich Text Editor* sepenuhnya. Kini mendukung Format Teks (Tebal, Miring, Garis Bawah, *Header*), *Checklist* interaktif, *Bullet List*, dan fitur menyisipkan Gambar (*Image Picker*) dari galeri langsung ke dalam catatan. Penyimpanan teks otomatis bermigrasi dari *String* ke *Delta JSON* dengan sangat aman tanpa merusak catatan versi lama.
 *   **Voice AI Timer**: Penambahan indikator durasi rekam (*timer* `00:00`) secara langsung di sebelah tombol mikrofon saat Voice AI sedang merekam, agar durasi dapat terpantau.
 *   **Live Search Bar**: Mengaktifkan kotak pencarian di halaman utama sehingga pengguna dapat mencari catatan spesifik berdasarkan "Judul" ataupun "Isi Catatan" secara *real-time* saat mengetik.
+*   **Pembaruan Estetika UI Profesional**: Menghilangkan warna kartu pastel acak menjadi desain kartu putih bersih, serta menggunakan warna latar belakang *Slate 50* untuk kontras yang lebih elegan. Memperkecil rasio *box* kategori (pill) agar lebih ringkas dan lega.
+*   **Pembaruan Floating Action Button (FAB)**: Desain ulang tombol tambah catatan menjadi memusat di tengah bawah (*center float*) dengan gradasi memukau dan diiringi animasi *pulsing glow* yang selaras dengan bentuk bulat tombol.
+*   **Integrasi Menu Pengaturan (*Settings*)**: Membangun antarmuka halaman Pengaturan lengkap yang memuat detail Profil, Preferensi Aplikasi (Mode Gelap, Sinkronisasi), Keamanan (Kunci Biometrik), dan Pengelolaan Data.
+*   **Empty State Visual**: Penggantian layar status kosong ("Belum ada catatan") dengan aset ilustrasi khusus yang lebih menarik dan komunikatif.
+*   **Deduplikasi Kategori (*Bug Fix*)**: Menerapkan algoritma penyaringan *(filtering)* di sisi BLoC untuk mencegah *race condition* yang memunculkan tab/pilihan kategori ganda (misal "Meeting" dua kali).
 
 ### Update pada tanggal 6 juni oleh Vinzsatoru
 **Integrasi DOKU Payment & Penyempurnaan AI:**
