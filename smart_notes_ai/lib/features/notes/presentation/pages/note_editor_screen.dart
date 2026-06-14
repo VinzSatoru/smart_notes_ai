@@ -721,7 +721,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
-  void _showAiResultSheet(String title, String content) {
+  void _showAiResultSheet(String title, String content, {String? actionLabel, VoidCallback? onAction}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -778,6 +778,33 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         ),
                       ),
                     ),
+                    if (actionLabel != null && onAction != null) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            onAction();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4F64F2),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            actionLabel,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1061,7 +1088,23 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                                   borderRadius: BorderRadius.circular(20),
                                                   onTap: () {
                                                     if (hasSummary) {
-                                                      _showAiResultSheet('Rangkuman AI', _summaryText!);
+                                                      _showAiResultSheet(
+                                                        'Rangkuman AI', 
+                                                        _summaryText!,
+                                                        actionLabel: 'Rangkum Ulang',
+                                                        onAction: () {
+                                                          if (isEmpty) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));
+                                                            return;
+                                                          }
+                                                          context.read<AiBloc>().add(
+                                                            ProcessTextRequested(
+                                                              text: _quillController.document.toPlainText(),
+                                                              action: 'summary',
+                                                            ),
+                                                          );
+                                                        }
+                                                      );
                                                     } else {
                                                       if (isEmpty) {
                                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));
@@ -1133,7 +1176,18 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                                   borderRadius: BorderRadius.circular(20),
                                                   onTap: () {
                                                     if (hasTranslate) {
-                                                      _showAiResultSheet('Terjemahan (${_translateLang ?? ''})', _translateText!);
+                                                      _showAiResultSheet(
+                                                        'Terjemahan (${_translateLang ?? ''})', 
+                                                        _translateText!,
+                                                        actionLabel: 'Ganti Bahasa',
+                                                        onAction: () {
+                                                          if (isEmpty) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));
+                                                            return;
+                                                          }
+                                                          _showLanguagePicker();
+                                                        }
+                                                      );
                                                     } else {
                                                       if (isEmpty) {
                                                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Catatan masih kosong.'), behavior: SnackBarBehavior.floating));

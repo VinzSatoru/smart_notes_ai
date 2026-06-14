@@ -66,6 +66,22 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> requestPasswordReset(String email) async {
+    try {
+      await remoteDataSource.requestPasswordReset(email);
+      return const Right(null);
+    } on ClientException catch (e) {
+      final msg = e.response['message'];
+      if (msg != null && msg.isNotEmpty) {
+        return Left(ServerFailure(msg));
+      }
+      return const Left(ServerFailure('Gagal mengirim email reset password.'));
+    } catch (e) {
+      return const Left(ServerFailure('Terjadi kesalahan tidak terduga.'));
+    }
+  }
+
   User _mapRecordToUser(RecordModel record) {
     return User(
       id: record.id,

@@ -4,6 +4,7 @@ import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/request_password_reset_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -14,6 +15,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final RequestPasswordResetUseCase requestPasswordResetUseCase;
   final EmailService emailService = EmailService();
 
   AuthBloc({
@@ -21,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.registerUseCase,
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
+    required this.requestPasswordResetUseCase,
   }) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
@@ -28,6 +31,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRefreshUserRequested>(_onRefreshUser);
     on<SendOtpRequested>(_onSendOtpRequested);
     on<VerifyOtpRequested>(_onVerifyOtpRequested);
+    on<ForgotPasswordRequested>(_onForgotPasswordRequested);
+  }
+
+  Future<void> _onForgotPasswordRequested(
+    ForgotPasswordRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await requestPasswordResetUseCase.execute(event.email);
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (_) => emit(ForgotPasswordEmailSent()),
+    );
   }
 
   Future<void> _onSendOtpRequested(

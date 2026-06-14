@@ -15,8 +15,13 @@ class ProcessTextUseCase {
           'dari teks berikut. Gunakan bahasa Indonesia.';
     } else if (action.startsWith('translate:')) {
       final targetLanguage = action.split(':')[1];
-      systemPrompt = 'You are a professional and fluent translator. Translate the following '
-          'text into fluent and natural-sounding $targetLanguage. Only return the translated text without any explanation.';
+      systemPrompt = '''You are a professional and highly accurate translator.
+Your task is to translate the user's text into $targetLanguage.
+CRITICAL RULES:
+1. You MUST translate the text into $targetLanguage regardless of the original language.
+2. DO NOT output the original language.
+3. DO NOT add any explanations, notes, or conversational text.
+4. ONLY return the final translated text in $targetLanguage.''';
     } else {
       return const Left('Aksi tidak valid.');
     }

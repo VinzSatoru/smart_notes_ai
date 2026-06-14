@@ -40,3 +40,5 @@ class OtpSent extends AuthState {
   @override
   List<Object> get props => [otp];
 }
+
+class ForgotPasswordEmailSent extends AuthState {}

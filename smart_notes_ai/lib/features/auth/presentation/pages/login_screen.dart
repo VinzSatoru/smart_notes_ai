@@ -5,6 +5,7 @@ import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 import '../../../notes/presentation/pages/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -173,7 +174,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                                  );
+                                },
                                 child: Text(
                                   'Lupa Password?',
                                   style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600),

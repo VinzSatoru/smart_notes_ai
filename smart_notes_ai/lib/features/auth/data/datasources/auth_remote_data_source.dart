@@ -6,6 +6,7 @@ abstract class AuthRemoteDataSource {
   Future<RecordModel> register(String name, String email, String password, String passwordConfirm);
   Future<void> logout();
   Future<RecordModel?> getCurrentUser();
+  Future<void> requestPasswordReset(String email);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -45,5 +46,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       return pbService.currentUser;
     }
     return null;
+  }
+
+  @override
+  Future<void> requestPasswordReset(String email) async {
+    await pbService.pb.collection('users').requestPasswordReset(email);
   }
 }
