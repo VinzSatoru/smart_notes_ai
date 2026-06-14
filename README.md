@@ -201,3 +201,9 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Auto-Polling & UI Kustom**: Menampilkan layar pembayaran dengan antarmuka elegan, deteksi kelulusan pembayaran otomatis (setiap 5 detik), dan mengubah status *tier* pengguna menjadi `pro` secara instan (*real-time state update*).
 *   **Perbaikan Cache Audio AI**: Memperbaiki masalah `PathNotFoundException` saat merekam lebih dari 1 menit dengan memindahkan penyimpanan *cache* rekaman ke `ApplicationDocumentsDirectory`, sehingga Android OS tidak menghapus file rekaman saat proses transkripsi berlangsung.
 *   **Bypass Anti-Bot Groq**: Menambahkan *User-Agent* spesifik untuk mencegah *error 403 Access Denied* dari Cloudflare Groq.
+
+### Update pada tanggal 15 Juni oleh Vinzsatoru
+**Penyempurnaan AI & Fitur Lupa Password:**
+*   **Penyempurnaan Re-Generate AI**: Menambahkan tombol aksi khusus ("Rangkum Ulang" & "Ganti Bahasa") langsung di dalam *Bottom Sheet* hasil AI sehingga pengguna tidak perlu menghapus catatan untuk menggunakan AI berulang kali dalam bahasa berbeda.
+*   **Perbaikan Bug Terjemahan LLaMA**: Merombak instruksi sistem (*System Prompt*) menjadi jauh lebih tegas dengan aturan ketat untuk mencegah LLaMA mengembalikan teks asli (bahasa Indonesia) saat diterjemahkan ke bahasa Inggris.
+*   **Fitur Lupa Password Terintegrasi PocketBase**: Membangun layar `ForgotPasswordScreen` yang aman dan terhubung dengan *endpoint* bawaan `requestPasswordReset` dari PocketBase, memungkinkan pengiriman tautan reset ke email pengguna tanpa menggunakan *Admin token*.
