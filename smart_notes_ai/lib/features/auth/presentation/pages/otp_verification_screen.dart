@@ -69,7 +69,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -120,7 +120,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: navyColor,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -129,7 +129,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             'Masukkan 6 digit kode OTP yang telah kami kirimkan ke email:\n${widget.email}',
                             style: TextStyle(
                               fontSize: 15,
-                              color: navyColor.withValues(alpha: 0.6),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               height: 1.5,
                             ),
                             textAlign: TextAlign.center,
@@ -185,12 +185,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: navyColor,
+                                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : navyColor,
                               ),
                               decoration: InputDecoration(
                                 counterText: "",
                                 filled: true,
-                                fillColor: Colors.grey.shade50,
+                                fillColor: Theme.of(context).brightness == Brightness.dark 
+                                    ? Colors.white.withValues(alpha: 0.05) 
+                                    : Colors.grey.shade50,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: BorderSide.none,

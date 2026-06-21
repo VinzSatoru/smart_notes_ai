@@ -128,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.help_outline_rounded,
                   iconColor: const Color(0xFF0EA5E9),
                   title: 'Pusat Bantuan & FAQ',
-                  onTap: () {},
+                  onTap: () => _showFAQDialog(context),
                 ),
                 _buildDivider(),
                 _buildActionTile(
@@ -137,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Versi Aplikasi',
                   subtitle: 'v1.1.0 (Build 24)',
                   showArrow: false,
-                  onTap: () {},
+                  onTap: () => _showVersionDialog(context),
                 ),
               ]),
               
@@ -145,6 +145,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _showFAQDialog(BuildContext context) {
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardTheme.color,
+        title: Text('Pusat Bantuan & FAQ', style: TextStyle(color: textColor)),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Q: Bagaimana cara kerja fitur AI?', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+              const SizedBox(height: 4),
+              Text('A: Buka halaman editor catatan, ketuk ikon AI, lalu Anda bisa merekam suara untuk diubah menjadi teks (Transkripsi) atau merangkum tulisan.', style: TextStyle(color: textColor)),
+              const SizedBox(height: 16),
+              Text('Q: Berapa batas pemakaian AI?', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+              const SizedBox(height: 4),
+              Text('A: Pengguna gratis mendapatkan 3x transkripsi, 5x rangkuman, dan 10 menit batas rekam per hari. Upgrade ke PRO untuk akses tanpa batas.', style: TextStyle(color: textColor)),
+              const SizedBox(height: 16),
+              Text('Q: Apakah catatan saya aman?', style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+              const SizedBox(height: 4),
+              Text('A: Ya, catatan Anda disimpan secara aman dan disinkronisasi ke server kami agar bisa diakses kapan saja.', style: TextStyle(color: textColor)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVersionDialog(BuildContext context) {
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardTheme.color,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            const Icon(Icons.info_outline_rounded, size: 64, color: Color(0xFF64748B)),
+            const SizedBox(height: 24),
+            Text('Smart Notes AI', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)),
+            const SizedBox(height: 4),
+            Text('Versi 1.1.0 (Build 24)', style: TextStyle(color: textColor.withValues(alpha: 0.7))),
+            const SizedBox(height: 24),
+            Text('© 2026 Smart Notes AI Team', style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.5))),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
       ),
     );
   }
