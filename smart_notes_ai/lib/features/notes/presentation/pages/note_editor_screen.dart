@@ -18,8 +18,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:ui';
 import 'package:smart_notes_ai/features/payment/presentation/pages/payment_method_screen.dart';
 
-const Color navyColor = Color(0xFF1E293B);
-const Color primaryColor = Color(0xFF4F64F2);
+// Colors will be dynamic
 
 enum PaperPattern { none, ruled, grid }
 
@@ -42,6 +41,11 @@ class NoteEditorScreen extends StatefulWidget {
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
+  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get navyColor => Theme.of(context).colorScheme.onSurface;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get cardColor => Theme.of(context).cardTheme.color ?? Colors.white;
+  Color get subtitleColor => Theme.of(context).colorScheme.onSurfaceVariant;
   late TextEditingController _titleController;
   late quill.QuillController _quillController;
   final FocusNode _editorFocusNode = FocusNode();
@@ -56,7 +60,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late UndoHistoryController _undoController;
 
   // Theme state
-  Color _currentBgColor = const Color(0xFFF8F9FF);
+  Color? _currentBgColor;
   PaperPattern _currentPattern = PaperPattern.none;
 
   @override
@@ -225,7 +229,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showFormatToolbar() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -331,7 +335,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -496,7 +500,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showThemePicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -569,13 +573,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                       color: color,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: _currentBgColor == color
+                                        color: (_currentBgColor ?? backgroundColor) == color
                                             ? const Color(0xFF4F64F2)
                                             : Colors.grey.shade300,
-                                        width: _currentBgColor == color ? 3 : 1,
+                                        width: (_currentBgColor ?? backgroundColor) == color ? 3 : 1,
                                       ),
                                     ),
-                                    child: _currentBgColor == color
+                                    child: (_currentBgColor ?? backgroundColor) == color
                                         ? const Icon(
                                             Icons.check,
                                             color: Color(0xFF4F64F2),
@@ -663,7 +667,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -725,7 +729,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -819,6 +823,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   Widget build(BuildContext context) {
     final String timeFormatted = DateFormat('HH.mm').format(DateTime.now());
     final String dayFormatted = 'Hari Ini';
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocConsumer<AiBloc, AiState>(
       listener: (context, state) {
@@ -900,8 +905,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         }
       },
       builder: (context, aiState) {
+        final bgColor = _currentBgColor ?? backgroundColor;
         return Scaffold(
-          backgroundColor: _currentBgColor,
+          backgroundColor: bgColor,
           body: Stack(
             children: [
               // Background Pattern
@@ -926,7 +932,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: navyColor),
+                            icon: Icon(Icons.arrow_back_ios_new_rounded, color: navyColor),
                             onPressed: _saveNote,
                           ),
                           Row(
@@ -949,7 +955,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.more_vert_rounded, color: navyColor),
+                                icon: Icon(Icons.more_vert_rounded, color: navyColor),
                                 onPressed: _showMoreOptions,
                               ),
                             ],
@@ -983,13 +989,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(Icons.folder_outlined, size: 14, color: primaryColor),
+                                            Icon(Icons.folder_outlined, size: 14, color: primaryColor),
                                             const SizedBox(width: 6),
                                             Text(
                                               _selectedCategoryId == null || _selectedCategoryId == 'all'
                                                   ? 'Tanpa Kategori'
                                                   : widget.categories.firstWhere((c) => c.id == _selectedCategoryId, orElse: () => widget.categories.first).name,
-                                              style: const TextStyle(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
+                                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600, fontSize: 12),
                                             ),
                                           ],
                                         ),
@@ -1009,7 +1015,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                 // Title
                                 TextField(
                                   controller: _titleController,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 32,
                                     fontWeight: FontWeight.w800,
                                     color: navyColor,
@@ -1068,8 +1074,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                           children: [
                                             Container(
                                               decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFFF3E8FF), Color(0xFFE0E7FF)],
+                                                gradient: LinearGradient(
+                                                  colors: isDark 
+                                                      ? [const Color(0xFF3B285E), const Color(0xFF2A1C40)]
+                                                      : const [Color(0xFFF3E8FF), Color(0xFFE0E7FF)],
                                                   begin: Alignment.topLeft,
                                                   end: Alignment.bottomRight,
                                                 ),
@@ -1137,16 +1145,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                                             children: [
                                                               Text(
                                                                 hasSummary ? 'Rangkuman AI Tersedia' : 'Rangkuman AI',
-                                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
+                                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
                                                               ),
                                                               Text(
                                                                 hasSummary ? 'Ketuk untuk melihat hasil rangkuman.' : 'Belum ada rangkuman catatan. Ketuk untuk merangkum.',
-                                                                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                                                                style: TextStyle(fontSize: 13, color: subtitleColor),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
-                                                        const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black38),
+                                                        Icon(Icons.arrow_forward_ios_rounded, size: 16, color: subtitleColor.withValues(alpha: 0.5)),
                                                       ],
                                                     ),
                                                   ),
@@ -1156,8 +1164,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                             const SizedBox(height: 16),
                                             Container(
                                               decoration: BoxDecoration(
-                                                gradient: const LinearGradient(
-                                                  colors: [Color(0xFFDCFCE7), Color(0xFFD1FAE5)],
+                                                gradient: LinearGradient(
+                                                  colors: isDark 
+                                                      ? [const Color(0xFF1A3E2C), const Color(0xFF132B1F)]
+                                                      : const [Color(0xFFDCFCE7), Color(0xFFD1FAE5)],
                                                   begin: Alignment.topLeft,
                                                   end: Alignment.bottomRight,
                                                 ),
@@ -1215,16 +1225,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                                             children: [
                                                               Text(
                                                                 hasTranslate ? 'Terjemahan ${_translateLang ?? 'Tersedia'}' : 'Terjemahan',
-                                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
+                                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: navyColor),
                                                               ),
                                                               Text(
                                                                 hasTranslate ? 'Ketuk untuk melihat hasil terjemahan.' : 'Belum ada terjemahan catatan. Ketuk untuk menerjemahkan.',
-                                                                style: const TextStyle(fontSize: 13, color: Colors.black54),
+                                                                style: TextStyle(fontSize: 13, color: subtitleColor),
                                                               ),
                                                             ],
                                                           ),
                                                         ),
-                                                        const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black38),
+                                                        Icon(Icons.arrow_forward_ios_rounded, size: 16, color: subtitleColor.withValues(alpha: 0.5)),
                                                       ],
                                                     ),
                                                   ),
@@ -1259,9 +1269,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: cardColor.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                        border: Border.all(color: cardColor.withValues(alpha: 0.5), width: 1.5),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
@@ -1282,10 +1292,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                   return Row(
                                     children: [
                                       Container(width: 1, height: 24, color: Colors.transparent, margin: const EdgeInsets.symmetric(horizontal: 4)),
-                                      IconButton(icon: const Icon(Icons.text_fields_rounded, size: 22, color: navyColor), onPressed: _showFormatToolbar),
-                                      IconButton(icon: const Icon(Icons.check_box_outlined, size: 22, color: navyColor), onPressed: _toggleChecklist),
-                                      IconButton(icon: const Icon(Icons.format_list_bulleted_rounded, size: 22, color: navyColor), onPressed: _toggleBulletList),
-                                      IconButton(icon: const Icon(Icons.image_outlined, size: 22, color: navyColor), onPressed: _pickImage),
+                                      IconButton(icon: Icon(Icons.text_fields_rounded, size: 22, color: navyColor), onPressed: _showFormatToolbar),
+                                      IconButton(icon: Icon(Icons.check_box_outlined, size: 22, color: navyColor), onPressed: _toggleChecklist),
+                                      IconButton(icon: Icon(Icons.format_list_bulleted_rounded, size: 22, color: navyColor), onPressed: _toggleBulletList),
+                                      IconButton(icon: Icon(Icons.image_outlined, size: 22, color: navyColor), onPressed: _pickImage),
                                     ],
                                   );
                                 },
@@ -1432,7 +1442,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   void _showCategoryPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1497,7 +1507,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

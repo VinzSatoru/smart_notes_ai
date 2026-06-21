@@ -21,7 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   final Color primaryColor = const Color(0xFF4F64F2);
-  final Color navyColor = const Color(0xFF1E293B);
+  Color get navyColor => Theme.of(context).colorScheme.onSurface;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get cardColor => Theme.of(context).cardTheme.color ?? Colors.white;
+  Color get subtitleColor => Theme.of(context).colorScheme.onSurfaceVariant;
 
   @override
   void dispose() {
@@ -49,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       body: Stack(
         children: [
           // Background Acent Orbs (Same as Splash)
@@ -301,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -340,7 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
       width: 80,
       height: 60,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: navyColor.withValues(alpha: 0.05)),
         boxShadow: [

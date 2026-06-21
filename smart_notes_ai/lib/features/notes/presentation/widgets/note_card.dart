@@ -22,8 +22,9 @@ class NoteCard extends StatefulWidget {
 
 class _NoteCardState extends State<NoteCard> {
   bool _isPressed = false;
-  final Color navyColor = const Color(0xFF1E293B);
-  final Color primaryColor = const Color(0xFF4F64F2);
+  Color get navyColor => Theme.of(context).colorScheme.onSurface;
+  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get cardColor => Theme.of(context).cardTheme.color ?? Colors.white;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,7 @@ class _NoteCardState extends State<NoteCard> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: navyColor.withValues(alpha: 0.05), width: 1),
             boxShadow: [

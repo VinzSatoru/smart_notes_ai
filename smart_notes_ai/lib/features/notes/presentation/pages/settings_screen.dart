@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/pages/forgot_password_screen.dart';
+import '../../../../core/theme/theme_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -17,24 +19,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final Color backgroundColor = const Color(0xFFF8FAFC);
   
   bool _isDarkMode = false;
-  bool _autoSync = true;
-  bool _biometricAuth = false;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: navyColor),
+          icon: Icon(Icons.arrow_back_rounded, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Pengaturan',
-          style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
@@ -59,22 +62,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // Preferensi Aplikasi
               _buildSectionTitle('Preferensi Aplikasi'),
               _buildSettingsCard([
-                _buildSwitchTile(
-                  icon: Icons.dark_mode_rounded,
-                  iconColor: const Color(0xFF6366F1),
-                  title: 'Mode Gelap (BETA)',
-                  subtitle: 'Gunakan tema gelap untuk kenyamanan mata',
-                  value: _isDarkMode,
-                  onChanged: (val) => setState(() => _isDarkMode = val),
-                ),
-                _buildDivider(),
-                _buildSwitchTile(
-                  icon: Icons.sync_rounded,
-                  iconColor: const Color(0xFF10B981),
-                  title: 'Sinkronisasi Otomatis',
-                  subtitle: 'Simpan catatan ke cloud secara otomatis',
-                  value: _autoSync,
-                  onChanged: (val) => setState(() => _autoSync = val),
+                BlocBuilder<ThemeCubit, ThemeMode>(
+                  builder: (context, themeMode) {
+                    final isDarkMode = themeMode == ThemeMode.dark || 
+                        (themeMode == ThemeMode.system && Theme.of(context).brightness == Brightness.dark);
+                    return _buildSwitchTile(
+                      icon: Icons.dark_mode_rounded,
+                      iconColor: const Color(0xFF6366F1),
+                      title: 'Mode Gelap',
+                      subtitle: 'Gunakan tema gelap untuk kenyamanan mata',
+                      value: isDarkMode,
+                      onChanged: (val) {
+                        context.read<ThemeCubit>().toggleTheme(val);
+                      },
+                    );
+                  }
                 ),
               ]),
               const SizedBox(height: 24),
@@ -82,22 +84,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // Keamanan & Privasi
               _buildSectionTitle('Keamanan & Privasi'),
               _buildSettingsCard([
-                _buildSwitchTile(
-                  icon: Icons.fingerprint_rounded,
-                  iconColor: const Color(0xFFF59E0B),
-                  title: 'Kunci Biometrik',
-                  subtitle: 'Gunakan sidik jari untuk membuka aplikasi',
-                  value: _biometricAuth,
-                  onChanged: (val) => setState(() => _biometricAuth = val),
-                ),
-                _buildDivider(),
                 _buildActionTile(
                   icon: Icons.lock_reset_rounded,
                   iconColor: const Color(0xFFEC4899),
                   title: 'Ubah Kata Sandi',
+                  subtitle: 'Kirim link reset ke email Anda',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fitur ubah kata sandi akan segera hadir!')),
+                    // Navigasi ke Forgot Password Screen buatan teman
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
                     );
                   },
                 ),
@@ -111,22 +109,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.cleaning_services_rounded,
                   iconColor: const Color(0xFF8B5CF6),
                   title: 'Bersihkan Cache',
-                  subtitle: '12.4 MB ruang dapat dibebaskan',
+                  subtitle: 'Kosongkan memori sementara',
                   onTap: () {
+                    PaintingBinding.instance.imageCache.clear();
+                    PaintingBinding.instance.imageCache.clearLiveImages();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Cache berhasil dibersihkan!')),
-                    );
-                  },
-                ),
-                _buildDivider(),
-                _buildActionTile(
-                  icon: Icons.download_rounded,
-                  iconColor: const Color(0xFF3B82F6),
-                  title: 'Ekspor Catatan',
-                  subtitle: 'Simpan semua catatan ke format PDF/TXT',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Fitur ekspor catatan akan segera hadir!')),
+                      const SnackBar(content: Text('Cache memori berhasil dibersihkan!')),
                     );
                   },
                 ),
@@ -162,12 +150,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildProfileCard(String name, String email, bool isPremium) {
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final subtitleColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: navyColor.withValues(alpha: 0.05)),
+        border: Border.all(color: textColor.withValues(alpha: 0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -216,7 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: navyColor,
+                    color: textColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -226,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   email,
                   style: TextStyle(
                     fontSize: 14,
-                    color: navyColor.withValues(alpha: 0.5),
+                    color: subtitleColor,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -256,6 +247,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSectionTitle(String title) {
+    final textColor = Theme.of(context).colorScheme.onSurfaceVariant;
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 12),
       child: Text(
@@ -263,7 +255,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: navyColor.withValues(alpha: 0.4),
+          color: textColor,
           letterSpacing: 1.2,
         ),
       ),
@@ -273,9 +265,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingsCard(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: navyColor.withValues(alpha: 0.05)),
+        color: Theme.of(context).cardTheme.color,
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -294,41 +285,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
     required Color iconColor,
     required String title,
-    String? subtitle,
+    required String subtitle,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: iconColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: iconColor, size: 22),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: navyColor,
-        ),
-      ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: navyColor.withValues(alpha: 0.4),
-              ),
-            )
-          : null,
-      trailing: Switch.adaptive(
-        value: value,
-        onChanged: onChanged,
-        activeColor: primaryColor,
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final subtitleColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: subtitleColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: primaryColor,
+          ),
+        ],
       ),
     );
   }
@@ -341,48 +346,65 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool showArrow = true,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: iconColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: iconColor, size: 22),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: navyColor,
-        ),
-      ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                color: navyColor.withValues(alpha: 0.4),
-              ),
-            )
-          : null,
-      trailing: showArrow
-          ? Icon(Icons.chevron_right_rounded, color: navyColor.withValues(alpha: 0.2))
-          : null,
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final subtitleColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: subtitleColor,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (showArrow)
+              Icon(
+                Icons.chevron_right_rounded,
+                color: subtitleColor.withValues(alpha: 0.5),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildDivider() {
     return Padding(
-      padding: const EdgeInsets.only(left: 60, right: 20),
-      child: Divider(
-        height: 1,
-        thickness: 1,
-        color: navyColor.withValues(alpha: 0.05),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Divider(height: 1, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1)),
     );
   }
 }

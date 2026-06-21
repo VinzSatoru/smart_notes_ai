@@ -32,8 +32,10 @@ class AllNotesManagementScreen extends StatefulWidget {
 class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
   final Set<String> _selectedNoteIds = {};
   bool _isSelectionMode = false;
-  final Color primaryColor = const Color(0xFF4F64F2);
-  final Color navyColor = const Color(0xFF1E293B);
+  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get navyColor => Theme.of(context).colorScheme.onSurface;
+  Color get cardColor => Theme.of(context).cardTheme.color ?? Colors.white;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
 
   void _toggleSelection(String noteId) {
     setState(() {
@@ -97,9 +99,9 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_rounded, color: navyColor),
@@ -280,7 +282,7 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: isSelected ? primaryColor.withValues(alpha: 0.1) : Colors.white,
+                    color: isSelected ? primaryColor.withValues(alpha: 0.1) : cardColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isSelected ? primaryColor : navyColor.withValues(alpha: 0.05),
@@ -373,7 +375,7 @@ class _AllNotesManagementScreenState extends State<AllNotesManagementScreen> {
   void _showNoteOptions(BuildContext context, Note note) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

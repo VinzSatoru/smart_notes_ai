@@ -27,8 +27,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Color primaryColor = const Color(0xFF4F64F2);
-  final Color navyColor = const Color(0xFF1E293B);
+  Color get primaryColor => Theme.of(context).primaryColor;
+  Color get navyColor => Theme.of(context).colorScheme.onSurface;
+  Color get backgroundColor => Theme.of(context).scaffoldBackgroundColor;
+  Color get cardColor => Theme.of(context).cardTheme.color ?? Colors.white;
+  Color get subtitleColor => Theme.of(context).colorScheme.onSurfaceVariant;
+  
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -83,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -225,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddNoteOptions(BuildContext context, String userId, List<Category> categories) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
@@ -302,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: navyColor.withValues(alpha: 0.05)),
         ),
@@ -348,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF8FAFC), // Slate 50
+      backgroundColor: backgroundColor,
       drawer: _buildDrawer(userName, userId, isPremium),
       body: SafeArea(
         child: BlocBuilder<NotesBloc, NotesState>(
@@ -424,7 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: navyColor.withValues(alpha: 0.08)),
               ),
@@ -507,7 +511,7 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : Colors.white,
+          color: isSelected ? primaryColor : cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: isSelected ? primaryColor : navyColor.withValues(alpha: 0.08)),
           boxShadow: isSelected 
@@ -518,7 +522,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text(
           title,
           style: TextStyle(
-            color: isSelected ? Colors.white : navyColor.withValues(alpha: 0.6),
+            color: isSelected ? Colors.white : subtitleColor,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 12,
           ),
@@ -596,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawer(String userName, String userId, bool isPremium) {
     return Drawer(
-      backgroundColor: const Color(0xFFFBFBFD),
+      backgroundColor: backgroundColor,
       child: SafeArea(
         child: Column(
           children: [
@@ -747,7 +751,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDrawerGroup(List<Widget> children) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),

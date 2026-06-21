@@ -120,9 +120,9 @@ class _PaymentWaitingScreenState extends State<PaymentWaitingScreen> {
     final formattedAmount = formatter.format(widget.paymentResult.amount);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(

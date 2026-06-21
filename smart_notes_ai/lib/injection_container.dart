@@ -34,9 +34,17 @@ import 'package:smart_notes_ai/features/notes/domain/repositories/notes_reposito
 import 'package:smart_notes_ai/features/notes/data/repositories/notes_repository_impl.dart';
 import 'package:smart_notes_ai/features/notes/data/datasources/notes_remote_data_source.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_notes_ai/core/theme/theme_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Core Services
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerFactory(() => ThemeCubit(sharedPreferences: sl()));
+
   // Features - Auth
   // Bloc
   sl.registerFactory(
