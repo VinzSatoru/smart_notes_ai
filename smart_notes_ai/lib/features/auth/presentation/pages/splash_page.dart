@@ -260,10 +260,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 55,
-                    color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ],

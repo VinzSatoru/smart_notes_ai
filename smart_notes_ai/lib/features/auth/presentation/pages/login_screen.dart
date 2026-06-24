@@ -113,7 +113,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ],
                                 ),
-                                child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 28),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Image.asset(
+                                    'assets/images/app_logo.png', 
+                                    width: 28, 
+                                    height: 28,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 24),
                               Text(
