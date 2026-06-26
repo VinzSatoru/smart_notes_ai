@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:avatar_glow/avatar_glow.dart';
 import 'package:intl/intl.dart';
@@ -120,6 +121,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _saveNote() {
+    HapticFeedback.lightImpact();
     final title = _titleController.text.trim();
     final contentPlainText = _quillController.document.toPlainText().trim();
     final contentJson = jsonEncode(
@@ -729,12 +731,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return DraggableScrollableSheet(
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: backgroundColor.withValues(alpha: 0.85),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: DraggableScrollableSheet(
           initialChildSize: 0.6,
           minChildSize: 0.4,
           maxChildSize: 0.9,
@@ -814,6 +823,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               ),
             );
           },
+        ),
+          ),
         );
       },
     );
@@ -1044,6 +1055,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                     scrollable: false,
                                     expands: false,
                                     autoFocus: false,
+                                    customStyles: quill.DefaultStyles(
+                                      paragraph: quill.DefaultTextBlockStyle(
+                                        TextStyle(
+                                          fontSize: 16,
+                                          height: 1.6,
+                                          color: navyColor,
+                                        ),
+                                        const quill.HorizontalSpacing(0, 0),
+                                        const quill.VerticalSpacing(0, 0),
+                                        const quill.VerticalSpacing(0, 0),
+                                        null,
+                                      ),
+                                    ),
                                   ),
                                   focusNode: _editorFocusNode,
                                 ),

@@ -28,7 +28,7 @@ class AppTheme {
         onSurface: lightTextPrimary,
         onSurfaceVariant: lightTextSecondary,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme().apply(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
         bodyColor: lightTextPrimary,
         displayColor: lightTextPrimary,
       ),
@@ -58,7 +58,7 @@ class AppTheme {
         onSurface: darkTextPrimary,
         onSurfaceVariant: darkTextSecondary,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme().apply(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
         bodyColor: darkTextPrimary,
         displayColor: darkTextPrimary,
       ),

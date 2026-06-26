@@ -23,6 +23,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, User>> loginWithGoogle() async {
+    try {
+      final record = await remoteDataSource.loginWithGoogle();
+      return Right(_mapRecordToUser(record));
+    } on ClientException catch (e) {
+      return Left(ServerFailure(e.response['message'] ?? 'Login dengan Google gagal.'));
+    } catch (e) {
+      return const Left(ServerFailure('Terjadi kesalahan tidak terduga saat login Google.'));
+    }
+  }
+
+  @override
   Future<Either<Failure, User>> register(String name, String email, String password, String passwordConfirm) async {
     try {
       // 1. Create account

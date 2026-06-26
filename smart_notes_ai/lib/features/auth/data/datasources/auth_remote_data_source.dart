@@ -1,8 +1,10 @@
 import 'package:pocketbase/pocketbase.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../services/pocketbase_service.dart';
 
 abstract class AuthRemoteDataSource {
   Future<RecordModel> login(String email, String password);
+  Future<RecordModel> loginWithGoogle();
   Future<RecordModel> register(String name, String email, String password, String passwordConfirm);
   Future<void> logout();
   Future<RecordModel?> getCurrentUser();
@@ -17,6 +19,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<RecordModel> login(String email, String password) async {
     final authRecord = await pbService.pb.collection('users').authWithPassword(email, password);
+    return authRecord.record;
+  }
+
+  @override
+  Future<RecordModel> loginWithGoogle() async {
+    // Requires url_launcher
+    final authRecord = await pbService.pb.collection('users').authWithOAuth2('google', (url) async {
+      final uri = Uri.parse(url.toString());
+      if (!await launchUrl(uri)) {
+        throw Exception('Could not launch $url');
+      }
+    });
     return authRecord.record;
   }
 

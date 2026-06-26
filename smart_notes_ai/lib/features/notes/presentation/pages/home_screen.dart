@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -369,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Notes Content
                 Expanded(
                   child: state.status == NotesStatus.loading
-                      ? Center(child: CircularProgressIndicator(color: primaryColor))
+                      ? _buildShimmerLoading()
                       : state.notes.isEmpty
                           ? _buildEmptyState()
                           : _buildNotesList(context, state, userId),
@@ -410,6 +411,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return Shimmer.fromColors(
+      baseColor: cardColor,
+      highlightColor: cardColor.withValues(alpha: 0.5),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        itemCount: 4,
+        itemBuilder: (context, index) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          );
+        },
       ),
     );
   }

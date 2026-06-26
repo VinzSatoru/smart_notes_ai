@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/note.dart';
 import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter/services.dart';
 
 class NoteCard extends StatefulWidget {
   final Note note;
@@ -60,6 +61,7 @@ class _NoteCardState extends State<NoteCard> {
       onTapDown: (_) => setState(() => _isPressed = true),
       onTapUp: (_) {
         setState(() => _isPressed = false);
+        HapticFeedback.lightImpact();
         widget.onTap();
       },
       onTapCancel: () => setState(() => _isPressed = false),
@@ -68,21 +70,25 @@ class _NoteCardState extends State<NoteCard> {
         scale: _isPressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeOutCubic,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: navyColor.withValues(alpha: 0.05), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+        child: Hero(
+          tag: 'note_card_${note.id}',
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: navyColor.withValues(alpha: 0.05), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
+              child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -157,6 +163,8 @@ class _NoteCardState extends State<NoteCard> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }

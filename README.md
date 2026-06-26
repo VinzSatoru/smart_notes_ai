@@ -207,3 +207,10 @@ Selamat *ngoding* bersama tim! 🚀
 *   **Penyempurnaan Re-Generate AI**: Menambahkan tombol aksi khusus ("Rangkum Ulang" & "Ganti Bahasa") langsung di dalam *Bottom Sheet* hasil AI sehingga pengguna tidak perlu menghapus catatan untuk menggunakan AI berulang kali dalam bahasa berbeda.
 *   **Perbaikan Bug Terjemahan LLaMA**: Merombak instruksi sistem (*System Prompt*) menjadi jauh lebih tegas dengan aturan ketat untuk mencegah LLaMA mengembalikan teks asli (bahasa Indonesia) saat diterjemahkan ke bahasa Inggris.
 *   **Fitur Lupa Password Terintegrasi PocketBase**: Membangun layar `ForgotPasswordScreen` yang aman dan terhubung dengan *endpoint* bawaan `requestPasswordReset` dari PocketBase, memungkinkan pengiriman tautan reset ke email pengguna tanpa menggunakan *Admin token*.
+
+### Update pada tanggal 26 Juni oleh Vinzsatoru
+**Modernisasi Autentikasi (Google OAuth2):**
+*   **Google Login Integrasi**: Menambahkan fitur login dengan Google menggunakan PocketBase OAuth2 dan `url_launcher`.
+*   **Penghapusan Facebook Login**: Menyederhanakan layar autentikasi dengan memfokuskan pada ekosistem Google dan menghapus tombol login Facebook.
+*   **UI/UX Improvement**: Memperbarui tombol social login menggunakan logo Google asli (PNG) agar lebih profesional.
+*   **Adb Reverse Setup**: Memungkinkan testing Google Login dengan IP `127.0.0.1` langsung di device Android fisik melalui port forwarding USB.

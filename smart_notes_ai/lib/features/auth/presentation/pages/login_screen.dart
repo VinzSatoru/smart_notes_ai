@@ -249,13 +249,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
                               const SizedBox(height: 24),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildSocialButton(Icons.facebook, const Color(0xFF1877F2)),
-                                  const SizedBox(width: 16),
-                                  _buildSocialButton('G', Colors.red, isGoogle: true),
-                                ],
+                              GestureDetector(
+                                onTap: () {
+                                  context.read<AuthBloc>().add(GoogleLoginRequested());
+                                },
+                                child: _buildSocialButton('Masuk dengan Google', Colors.red, isGoogle: true, width: double.infinity),
                               ),
                               const SizedBox(height: 40),
                               Row(
@@ -346,9 +344,9 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildSocialButton(dynamic icon, Color iconColor, {bool isGoogle = false}) {
+  Widget _buildSocialButton(dynamic icon, Color iconColor, {bool isGoogle = false, double width = 80}) {
     return Container(
-      width: 80,
+      width: width,
       height: 60,
       decoration: BoxDecoration(
         color: cardColor,
@@ -364,9 +362,16 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: Center(
         child: isGoogle
-            ? Text(
-                icon,
-                style: TextStyle(color: iconColor, fontWeight: FontWeight.bold, fontSize: 24),
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/google_logo.png', width: 24, height: 24),
+                  const SizedBox(width: 12),
+                  Text(
+                    icon,
+                    style: TextStyle(color: navyColor, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
               )
             : Icon(icon, color: iconColor, size: 28),
       ),

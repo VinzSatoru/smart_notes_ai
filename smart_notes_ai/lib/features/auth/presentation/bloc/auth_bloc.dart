@@ -5,6 +5,7 @@ import '../../domain/usecases/register_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/request_password_reset_usecase.dart';
+import '../../domain/usecases/login_with_google_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -16,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final RequestPasswordResetUseCase requestPasswordResetUseCase;
+  final LoginWithGoogleUseCase loginWithGoogleUseCase;
   final EmailService emailService = EmailService();
 
   AuthBloc({
@@ -24,14 +26,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
     required this.requestPasswordResetUseCase,
+    required this.loginWithGoogleUseCase,
   }) : super(AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
+    on<GoogleLoginRequested>(_onGoogleLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<AuthRefreshUserRequested>(_onRefreshUser);
     on<SendOtpRequested>(_onSendOtpRequested);
     on<VerifyOtpRequested>(_onVerifyOtpRequested);
     on<ForgotPasswordRequested>(_onForgotPasswordRequested);
+  }
+
+  Future<void> _onGoogleLoginRequested(
+    GoogleLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await loginWithGoogleUseCase.execute();
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => emit(Authenticated(user: user)),
+    );
   }
 
   Future<void> _onForgotPasswordRequested(
