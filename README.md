@@ -54,23 +54,40 @@ Pastikan Anda sudah menginstal:
 - [Dart SDK](https://dart.dev/get-dart)
 - Emulator Android / iOS atau perangkat fisik yang terhubung (USB Debugging aktif).
 
-### 2. Konfigurasi Backend (PocketBase)
-Karena aplikasi ini mengandalkan *backend* lokal, Anda harus menjalankan PocketBase terlebih dahulu sebelum me-*run* Flutter.
+### 2. Konfigurasi Backend (PocketBase dengan Go Extension)
+Backend saat ini telah dimigrasikan menjadi aplikasi Go yang mengintegrasikan PocketBase sebagai *framework*/*extension*. Ini memungkinkan kita untuk menambahkan logika *custom* di sisi server dan mengompilasi backend menjadi satu file *executable* tunggal untuk Linux Server.
 
-1. Buka folder *backend* di terminal (berada di luar folder `smart_notes_ai`):
+#### A. Menjalankan Backend secara Lokal (Development)
+1. Buka folder *backend* di terminal:
    ```bash
-   cd ../backend
+   cd backend
    ```
-2. Jalankan _server_ PocketBase:
+2. Jalankan backend menggunakan Go secara langsung (pastikan Go sudah terinstal):
    ```bash
-   # Di Windows
-   .\pocketbase.exe serve
-   
-   # Di Mac/Linux
-   ./pocketbase serve
+   go run main.go serve
    ```
-3. Pastikan *server* berjalan di `http://127.0.0.1:8090`. (Jika IP berbeda, sesuaikan _base URL_ pada `lib/services/pocketbase_service.dart`).
-4. Buka URL `http://127.0.0.1:8090/_/` di browser untuk mengakses *Admin UI* dari PocketBase jika diperlukan.
+   *Atau* Anda dapat melakukan kompilasi lokal terlebih dahulu:
+   ```bash
+   go build -o pocketbase_custom.exe main.go
+   .\pocketbase_custom.exe serve
+   ```
+3. Pastikan *server* berjalan di `http://127.0.0.1:8090`.
+4. Dashboard Admin dapat diakses di `http://127.0.0.1:8090/_/`.
+
+#### B. Mengompilasi untuk Server Linux (Production)
+Untuk melakukan kompilasi silang (*cross-compilation*) dari mesin Windows ke target Linux server (executable file 64-bit):
+1. Jalankan perintah kompilasi berikut di terminal (PowerShell):
+   ```powershell
+   $env:GOOS="linux"
+   $env:GOARCH="amd64"
+   go build -o pocketbase_linux main.go
+   ```
+2. Salin file `pocketbase_linux` yang dihasilkan ke server Linux Anda, beserta folder `pb_migrations/` dan `pb_data/` (jika ingin menyalin database lokal Anda).
+3. Di server Linux, jalankan server dengan memberikan izin eksekusi:
+   ```bash
+   chmod +x pocketbase_linux
+   ./pocketbase_linux serve
+   ```
 
 ### 3. Konfigurasi Frontend (Flutter)
 1. Buka tab terminal baru, lalu navigasi ke direktori *project* Flutter:
