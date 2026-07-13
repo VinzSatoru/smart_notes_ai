@@ -1,4 +1,4 @@
-package com.example.smart_notes_ai
+package com.smartnotes.smart_notes_ai
 
 import io.flutter.embedding.android.FlutterActivity
 

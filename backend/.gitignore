@@ -1,0 +1,7 @@
+# Ignore custom compiled binaries
+pocketbase_custom.exe
+pocketbase_linux
+*.exe
+
+# Ignore uploaded media/storage
+pb_data/storage/
