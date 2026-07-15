@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Smart Notes AI</title>
+    <meta name="description" content="Privacy Policy for Smart Notes AI mobile application">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F64F2;
+            --primary-light: #6B7CFF;
+            --primary-dark: #3A4BD4;
+            --bg: #0F1117;
+            --bg-card: #1A1D2E;
+            --bg-card-hover: #222640;
+            --text: #E8E9F0;
+            --text-muted: #9CA3B8;
+            --border: rgba(79, 100, 242, 0.15);
+            --glow: rgba(79, 100, 242, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Background effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -300px;
+            left: -200px;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(79, 100, 242, 0.1) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            padding: 48px 0 32px;
+            text-align: center;
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+            padding: 12px 24px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 15px var(--glow);
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .effective-date {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 6px 16px;
+            background: rgba(79, 100, 242, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 13px;
+            color: var(--primary-light);
+            font-weight: 500;
+        }
+
+        /* Content sections */
+        main {
+            padding-bottom: 80px;
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: rgba(79, 100, 242, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px var(--glow);
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            font-size: 15px;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        ul li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 9px;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--glow);
+        }
+
+        strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        a {
+            color: var(--primary-light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: rgba(79, 100, 242, 0.08);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin: 16px 0;
+        }
+
+        .info-box p {
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            .section {
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            header {
+                padding: 32px 0 24px;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.15s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.25s; }
+        .section:nth-child(5) { animation-delay: 0.3s; }
+        .section:nth-child(6) { animation-delay: 0.35s; }
+        .section:nth-child(7) { animation-delay: 0.4s; }
+        .section:nth-child(8) { animation-delay: 0.45s; }
+        .section:nth-child(9) { animation-delay: 0.5s; }
+        .section:nth-child(10) { animation-delay: 0.55s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo-icon">📝</div>
+                <span class="logo-text">Smart Notes AI</span>
+            </div>
+            <h1>Privacy Policy</h1>
+            <p class="subtitle">Your privacy matters to us. Here's how we handle your data.</p>
+            <span class="effective-date">Effective Date: July 15, 2026</span>
+        </header>
+
+        <main>
+            <div class="section">
+                <div class="section-number">1</div>
+                <h2>Introduction</h2>
+                <p>Welcome to <strong>Smart Notes AI</strong> ("we," "our," or "us"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application Smart Notes AI (the "App").</p>
+                <p>By using the App, you agree to the collection and use of information in accordance with this policy. If you do not agree with the terms of this Privacy Policy, please do not access or use the App.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-number">2</div>
+                <h2>Information We Collect</h2>
+                <p>We may collect the following types of information:</p>
+
+                <h3 style="color: #fff; font-size: 16px; margin: 20px 0 10px; font-weight: 600;">Account Information</h3>
+                <ul>
+                    <li><strong>Email address</strong> — used for account creation and authentication</li>
+                    <li><strong>Display name</strong> — used to personalize your experience</li>
+                    <li><strong>Profile picture</strong> — obtained through Google Sign-In (if applicable)</li>
+                </ul>
+
+                <h3 style="color: #fff; font-size: 16px; margin: 20px 0 10px; font-weight: 600;">User-Generated Content</h3>
+                <ul>
+                    <li><strong>Notes and text content</strong> — created and stored within the App</li>
+                    <li><strong>Categories and tags</strong> — used to organize your notes</li>
+                    <li><strong>Audio recordings</strong> — when using voice-to-text features</li>
+                </ul>
+
+                <h3 style="color: #fff; font-size: 16px; margin: 20px 0 10px; font-weight: 600;">Usage Data</h3>
+                <ul>
+                    <li><strong>AI feature usage</strong> — to manage your quota and improve our services</li>
+                    <li><strong>App preferences</strong> — such as theme settings</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-number">3</div>
+                <h2>How We Use Your Information</h2>
+                <p>We use the collected information for the following purposes:</p>
+                <ul>
+                    <li>To create and manage your user account</li>
+                    <li>To provide, maintain, and improve the App's functionality</li>
+                    <li>To enable AI-powered features such as text summarization, translation, and voice-to-text conversion</li>
+                    <li>To sync your notes and data across sessions</li>
+                    <li>To manage subscription tiers and usage quotas</li>
+                    <li>To send important service-related communications (e.g., password reset emails)</li>
+                    <li>To detect, prevent, and address technical issues</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-number">4</div>
+                <h2>Google Sign-In</h2>
+                <p>Our App offers Google Sign-In as an authentication option. When you sign in with Google, we receive access to your basic profile information (name, email, and profile picture) as authorized by your Google account settings.</p>
+                <div class="info-box">
+                    <p>We only request the minimum scopes necessary: <strong>email</strong> and <strong>profile</strong>. We do not access your Google contacts, calendar, drive, or any other Google services.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-number">5</div>
+                <h2>Data Storage & Security</h2>
+                <p>Your data is stored on secure servers powered by <strong>PocketBase</strong>. We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction.</p>
+                <ul>
+                    <li>All data transmissions are encrypted using <strong>HTTPS/TLS</strong></li>
+                    <li>Passwords are securely hashed and never stored in plain text</li>
+                    <li>Access to user data is restricted to authenticated users only</li>
+                    <li>We perform regular security assessments of our infrastructure</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-number">6</div>
+                <h2>Third-Party Services</h2>
+                <p>The App may use the following third-party services:</p>
+                <ul>
+                    <li><strong>Google OAuth 2.0</strong> — for authentication purposes</li>
+                    <li><strong>AI/LLM Services</strong> — for text summarization, translation, and voice-to-text processing. Text content sent to AI services is processed in real-time and is not permanently stored by these providers.</li>
+                    <li><strong>SMTP Email Service</strong> — for sending OTP codes and password reset emails</li>
+                </ul>
+                <p>Each third-party service operates under its own privacy policy. We encourage you to review their respective policies.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-number">7</div>
+                <h2>Data Sharing & Disclosure</h2>
+                <p>We do <strong>not</strong> sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:</p>
+                <ul>
+                    <li>With your explicit consent</li>
+                    <li>To comply with legal obligations or respond to lawful requests</li>
+                    <li>To protect the rights, property, or safety of our users and the public</li>
+                    <li>In connection with a merger, acquisition, or sale of assets (with prior notice)</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-number">8</div>
+                <h2>Your Rights</h2>
+                <p>You have the following rights regarding your personal data:</p>
+                <ul>
+                    <li><strong>Access</strong> — You can view your personal information within the App</li>
+                    <li><strong>Correction</strong> — You can update your profile information at any time</li>
+                    <li><strong>Deletion</strong> — You can request deletion of your account and associated data by contacting us</li>
+                    <li><strong>Export</strong> — You can request a copy of your data</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-number">9</div>
+                <h2>Children's Privacy</h2>
+                <p>Our App is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have collected personal data from a child under 13, we will take steps to delete that information promptly.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-number">10</div>
+                <h2>Changes to This Policy</h2>
+                <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Effective Date" above. You are advised to review this Privacy Policy periodically for any changes.</p>
+            </div>
+
+            <div class="section">
+                <div class="section-number">📧</div>
+                <h2>Contact Us</h2>
+                <p>If you have any questions or concerns about this Privacy Policy, please contact us at:</p>
+                <div class="info-box">
+                    <p><strong>Email:</strong> <a href="mailto:ahmadnoviandz05@gmail.com">ahmadnoviandz05@gmail.com</a></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Smart Notes AI. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
