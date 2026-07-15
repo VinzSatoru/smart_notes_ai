@@ -1,13 +1,12 @@
 import 'package:pocketbase/pocketbase.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PocketBaseService {
-  // Gunakan 10.0.2.2 untuk Emulator Android Studio. 
-  // Jika menggunakan HP Fisik, ganti kembali ke 127.0.0.1 dan jalankan `adb reverse tcp:8090 tcp:8090`
-  static const String baseUrl = 'http://127.0.0.1:8090';
-  
+  late final String baseUrl;
   late final PocketBase pb;
 
   PocketBaseService() {
+    baseUrl = dotenv.env['POCKETBASE_URL'] ?? 'https://api-smartnotes.uwangku.web.id';
     pb = PocketBase(baseUrl);
   }
 
