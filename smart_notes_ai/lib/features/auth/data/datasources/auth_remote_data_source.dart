@@ -29,7 +29,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'google',
       (url) async {
         final uri = Uri.parse(url.toString());
-        if (!await launchUrl(uri)) {
+        if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
           throw Exception('Could not launch $url');
         }
       },
