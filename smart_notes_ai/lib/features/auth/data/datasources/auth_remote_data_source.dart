@@ -25,12 +25,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<RecordModel> loginWithGoogle() async {
     // Requires url_launcher
-    final authRecord = await pbService.pb.collection('users').authWithOAuth2('google', (url) async {
-      final uri = Uri.parse(url.toString());
-      if (!await launchUrl(uri)) {
-        throw Exception('Could not launch $url');
-      }
-    });
+    final authRecord = await pbService.pb.collection('users').authWithOAuth2(
+      'google',
+      (url) async {
+        final uri = Uri.parse(url.toString());
+        if (!await launchUrl(uri)) {
+          throw Exception('Could not launch $url');
+        }
+      },
+      createData: {
+        "tier": "free",
+        "ai_quota_used": 0,
+      },
+    );
     return authRecord.record;
   }
 
